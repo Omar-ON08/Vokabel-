@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Persisch · Deutsch · Englisch – Verben in 4 Zeitformen</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0c12;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      padding: 16px;
+      overflow-x: hidden;
+      margin: 0;
+    }
+    .app {
+      max-width: 700px;
+      width: 100%;
+      background: #0f172a;
+      border-radius: 48px 48px 32px 32px;
+      padding: 24px 20px 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+      border: 1px solid #1e293b;
+    }
+    .card-wrapper {
+      perspective: 1200px;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto 24px;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .card {
+      background: #1e293b;
+      border-radius: 32px;
+      padding: 24px 18px 28px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+      border: 1px solid #334155;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+    }
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+    .card-face {
+      backface-visibility: hidden;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 24px 18px 28px;
+      height: 100%;
+      width: 100%;
+      background: #1e293b;
+      border-radius: 32px;
+    }
+    .card-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+    .de-word {
+      color: #fbbf24;
+      font-weight: 700;
+      font-size: clamp(22px, 7vw, 32px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .en-word {
+      color: #e2e8f0;
+      font-size: clamp(14px, 4vw, 18px);
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: -2px;
+    }
+    .example {
+      color: #cbd5e1;
+      font-size: clamp(15px, 3.5vw, 18px);
+      font-style: italic;
+      margin-top: 6px;
+      border-left: 3px solid #fbbf24;
+      padding-left: 12px;
+    }
+    .grammar {
+      background: #1e293b;
+      color: #f1f5f9;
+      padding: 14px 14px;
+      border-radius: 18px;
+      margin-top: 10px;
+      font-size: clamp(13px, 2.8vw, 16px);
+      border: 1px solid #334155;
+      line-height: 1.6;
+    }
+    .grammar strong { color: #fbbf24; font-weight: 600; }
+    .tense-table {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 16px;
+      background: #0f172a;
+      padding: 10px 12px;
+      border-radius: 16px;
+      margin-top: 8px;
+      border: 1px solid #2d3b4f;
+    }
+    .tense-item {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      padding: 2px 0;
+    }
+    .tense-label {
+      color: #94a3b8;
+      font-weight: 500;
+      font-size: 0.85em;
+      min-width: 60px;
+    }
+    .tense-value {
+      color: #f1f5f9;
+      font-weight: 500;
+      word-break: break-word;
+    }
+    .prep-line {
+      margin-top: 8px;
+      color: #cbd5e1;
+      border-top: 1px solid #2d3b4f;
+      padding-top: 8px;
+    }
+    .prep-line span { color: #fbbf24; }
+    .fa-word {
+      color: #4ade80;
+      font-size: clamp(20px, 6vw, 28px);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      direction: rtl;
+      word-break: break-word;
+    }
+    .fa-example {
+      color: #d1d5db;
+      font-size: clamp(16px, 3.5vw, 20px);
+      direction: rtl;
+      word-break: break-word;
+      margin-top: 8px;
+      background: #0f172a;
+      padding: 12px 14px;
+      border-radius: 20px;
+      border-right: 4px solid #4ade80;
+    }
+    .speaker {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #1e293b;
+      border-radius: 40px;
+      padding: 2px 10px 2px 6px;
+      gap: 3px;
+      font-size: 0.9em;
+      color: #94a3b8;
+      border: 1px solid #334155;
+      cursor: pointer;
+      transition: 0.2s;
+      touch-action: manipulation;
+    }
+    .speaker:active { transform: scale(0.92); background: #2d3b4f; }
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .nav-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #f1f5f9;
+      font-weight: 600;
+      font-size: clamp(15px, 3vw, 18px);
+      padding: 12px 16px;
+      min-width: 70px;
+      min-height: 48px;
+      border-radius: 60px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: 0.15s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+      cursor: pointer;
+      touch-action: manipulation;
+      flex: 1 0 auto;
+      max-width: 140px;
+    }
+    .nav-btn:active { transform: scale(0.94); background: #2d3b4f; }
+    .nav-btn.random-btn {
+      background: #fbbf24;
+      color: #0a0c12;
+      border-color: #fbbf24;
+      flex: 1 0 auto;
+    }
+    .random-btn:active { background: #eab308; }
+    .random-mode-badge {
+      background: #4ade80;
+      color: #0a0c12;
+      padding: 6px 14px;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 14px;
+      margin-left: 8px;
+    }
+    @media (max-width: 600px) {
+      .app { padding: 16px 12px 20px; }
+      .card { padding: 18px 14px 22px; min-height: 260px; }
+      .nav { gap: 8px; }
+      .nav-btn { padding: 10px 12px; min-width: 60px; min-height: 44px; }
+    }
+    @media (max-width: 480px) {
+      .app { padding: 12px 8px 16px; border-radius: 32px; }
+      .card { border-radius: 24px; padding: 14px 12px 18px; min-height: 240px; }
+      .tense-table { grid-template-columns: 1fr; gap: 4px; }
+      .nav-btn { font-size: 14px; padding: 8px 10px; min-height: 40px; }
+      .speaker { padding: 0 8px 0 4px; }
+      .grammar { padding: 10px 10px; }
+    }
+    @media (max-width: 380px) {
+      .de-word { font-size: clamp(18px, 6vw, 24px); }
+      .fa-word { font-size: clamp(16px, 5vw, 22px); }
+      .en-word { font-size: clamp(12px, 3.5vw, 15px); }
+      .example { font-size: clamp(13px, 3vw, 15px); }
+    }
+    .flex-row { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+    .mt-1 { margin-top: 6px; }
+    .rtl { direction: rtl; }
+    .text-center { text-align: center; }
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="card-wrapper" id="cardWrapper">
+    <div class="card" id="card">
+      <!-- Vorderseite (Deutsch) -->
+      <div class="card-face" id="frontFace">
+        <div class="card-inner">
+          <div class="de-word" id="deWord">
+            <span id="deText">Rundrücken</span>
+            <span class="speaker" id="speakDe" aria-label="Deutsch aussprechen">🔊</span>
+          </div>
+          <div class="en-word" id="enWord">
+            <span id="enText">round back</span>
+            <span class="speaker" id="speakEn" aria-label="Englisch aussprechen">🔊</span>
+          </div>
+          <div class="example" id="exampleDe">"Er hat einen Rundrücken."</div>
+          <div class="grammar" id="grammarBox">
+            <strong>Verb</strong> · Stamm: rundrücken
+            <div class="tense-table" id="tenseTable">
+              <div class="tense-item"><span class="tense-label">Präsens</span><span class="tense-value">ich runde</span></div>
+              <div class="tense-item"><span class="tense-label">Präteritum</span><span class="tense-value">ich rundete</span></div>
+              <div class="tense-item"><span class="tense-label">Perfekt</span><span class="tense-value">ich habe gerundet</span></div>
+              <div class="tense-item"><span class="tense-label">Futur I</span><span class="tense-value">ich werde runden</span></div>
+            </div>
+            <div class="prep-line">Präposition: <span>mit</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Rückseite (Persisch) -->
+      <div class="card-face card-back" id="backFace">
+        <div class="card-inner" style="height:100%;">
+          <div class="fa-word" id="faWord">
+            <span id="faText">پشت گرد</span>
+            <span class="speaker" id="speakFa" aria-label="Persisch aussprechen">🔊</span>
+          </div>
+          <div class="fa-example" id="faExample">فارسی: "او پشت گرد دارد."</div>
+          <div style="flex:1; min-height:20px;"></div>
+          <div style="color:#94a3b8; font-size:clamp(12px,2.5vw,14px); margin-top:8px; border-top:1px solid #2d3b4f; padding-top:10px;">
+            <span>🇩🇪 Deutsch · 🇬🇧 English · 🇮🇷 فارسی</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn" id="prevBtn" aria-label="Vorige">◀ Vorige</button>
+    <button class="nav-btn" id="nextBtn" aria-label="Nächste">Nächste ▶</button>
+    <button class="nav-btn random-btn" id="randomBtn" aria-label="Zufall">🎲 Zufall</button>
+  </div>
+  <div id="randomBadge" style="text-align:center; margin-top:12px; min-height:28px;"></div>
+</div>
+<script>
+  (function(){
+    // ---------- DATEN MIT 4 ZEITFORMEN (schön lesbar) ----------
+    const cardsData = [
+      { de: "Rundrücken", en: "round back", example: "Er hat einen Rundrücken.", 
+        tenses: { präsens: "ich runde", präteritum: "ich rundete", perfekt: "ich habe gerundet", futur: "ich werde runden" }, 
+        prep: "mit", fa: "پشت گرد", faExample: "فارسی: \"او پشت گرد دارد.\"" },
+      { de: "entsorgt", en: "disposed", example: "Der Müll wurde entsorgt.", 
+        tenses: { präsens: "ich entsorge", präteritum: "ich entsorgte", perfekt: "ich habe entsorgt", futur: "ich werde entsorgen" }, 
+        prep: "von", fa: "دفع شده", faExample: "فارسی: \"زباله دفع شد.\"" },
+      { de: "beugen", en: "bend", example: "Er beugt sich vor.", 
+        tenses: { präsens: "ich beuge", präteritum: "ich beugte", perfekt: "ich habe gebeugt", futur: "ich werde beugen" }, 
+        prep: "über", fa: "خم شدن", faExample: "فارسی: \"او خم می‌شود.\"" },
+      { de: "wehen", en: "blow (wind)", example: "Der Wind weht.", 
+        tenses: { präsens: "ich wehe", präteritum: "ich wehte", perfekt: "ich habe geweht", futur: "ich werde wehen" }, 
+        prep: "durch", fa: "وزیدن", faExample: "فارسی: \"باد می‌وزد.\"" },
+      { de: "ermahnen", en: "admonish", example: "Sie ermahnte ihn.", 
+        tenses: { präsens: "ich ermahne", präteritum: "ich ermahnte", perfekt: "ich habe ermahnt", futur: "ich werde ermahnen" }, 
+        prep: "zu", fa: "پند دادن", faExample: "فارسی: \"او به او پند داد.\"" },
+      { de: "diktieren", en: "dictate", example: "Der Lehrer diktiert.", 
+        tenses: { präsens: "ich diktiere", präteritum: "ich diktierte", perfekt: "ich habe diktiert", futur: "ich werde diktieren" }, 
+        prep: "nach", fa: "املاء کردن", faExample: "فارسی: \"معلم املاء می‌گوید.\"" },
+      { de: "verprügeln", en: "beat up", example: "Sie verprügelten ihn.", 
+        tenses: { präsens: "ich verprügele", präteritum: "ich verprügelte", perfekt: "ich habe verprügelt", futur: "ich werde verprügeln" }, 
+        prep: "mit", fa: "کتک زدن", faExample: "فارسی: \"او را کتک زدند.\"" },
+      { de: "knutschen", en: "snog", example: "Sie knutschen im Park.", 
+        tenses: { präsens: "ich knutsche", präteritum: "ich knutschte", perfekt: "ich habe geknutscht", futur: "ich werde knutschen" }, 
+        prep: "mit", fa: "بوسیدن (عاشقانه)", faExample: "فارسی: \"آنها در پارک همدیگر را می‌بوسند.\"" },
+      { de: "konfiszieren", en: "confiscate", example: "Die Polizei konfiszierte.", 
+        tenses: { präsens: "ich konfisziere", präteritum: "ich konfiszierte", perfekt: "ich habe konfisziert", futur: "ich werde konfiszieren" }, 
+        prep: "von", fa: "مصادره کردن", faExample: "فارسی: \"پلیس مصادره کرد.\"" },
+      { de: "abfall", en: "waste", example: "Der Abfall wird getrennt.", 
+        tenses: null, prep: null, fa: "زباله", faExample: "فارسی: \"زباله جدا می‌شود.\"" },
+      { de: "steiler", en: "steeper", example: "Der Weg wird steiler.", 
+        tenses: null, prep: null, fa: "شیب‌دارتر", faExample: "فارسی: \"مسیر شیب‌دارتر می‌شود.\"" },
+      { de: "jubeln", en: "cheer", example: "Die Fans jubeln.", 
+        tenses: { präsens: "ich jubele", präteritum: "ich jubelte", perfekt: "ich habe gejubelt", futur: "ich werde jubeln" }, 
+        prep: "über", fa: "هلهله کردن", faExample: "فارسی: \"هواداران هلهله می‌کنند.\"" },
+      { de: "mähen", en: "mow", example: "Er mäht den Rasen.", 
+        tenses: { präsens: "ich mähe", präteritum: "ich mähte", perfekt: "ich habe gemäht", futur: "ich werde mähen" }, 
+        prep: "auf", fa: "چمن زدن", faExample: "فارسی: \"او چمن می‌زند.\"" },
+      { de: "muster", en: "pattern", example: "Das Muster ist schön.", 
+        tenses: null, prep: null, fa: "الگو", faExample: "فارسی: \"الگو زیباست.\"" },
+      { de: "sich nähren", en: "nourish oneself", example: "Er nährt sich gesund.", 
+        tenses: { präsens: "ich nähre", präteritum: "ich nährte", perfekt: "ich habe genährt", futur: "ich werde nähren" }, 
+        prep: "von", fa: "تغذیه کردن", faExample: "فارسی: \"او سالم تغذیه می‌کند.\"" },
+      { de: "die Faust (gegen)", en: "fist (against)", example: "Er ballte die Faust.", 
+        tenses: null, prep: "gegen", fa: "مشت (بر ضد)", faExample: "فارسی: \"او مشت خود را گره کرد.\"" },
+      { de: "leiht", en: "lends", example: "Er leiht mir Geld.", 
+        tenses: { präsens: "ich leihe", präteritum: "ich lieh", perfekt: "ich habe geliehen", futur: "ich werde leihen" }, 
+        prep: "von", fa: "قرض دادن", faExample: "فارسی: \"او به من پول قرض می‌دهد.\"" },
+      { de: "intensivität", en: "intensity", example: "Die Intensität steigt.", 
+        tenses: null, prep: null, fa: "شدت", faExample: "فارسی: \"شدت افزایش می‌یابد.\"" },
+      { de: "Artikulationsprobleme", en: "articulation problems", example: "Er hat Artikulationsprobleme.", 
+        tenses: null, prep: null, fa: "مشکلات تلفظ", faExample: "فارسی: \"او مشکلات تلفظ دارد.\"" },
+      { de: "verwehrt", en: "refused", example: "Der Zugang wurde verwehrt.", 
+        tenses: { präsens: "ich verwehre", präteritum: "ich verwehrte", perfekt: "ich habe verwehrt", futur: "ich werde verwehren" }, 
+        prep: "von", fa: "ممنوع شد", faExample: "فارسی: \"دسترسی ممنوع شد.\"" },
+      { de: "gehindert", en: "hindered", example: "Er wurde gehindert.", 
+        tenses: { präsens: "ich hindere", präteritum: "ich hinderte", perfekt: "ich habe gehindert", futur: "ich werde hindern" }, 
+        prep: "an", fa: "ممانعت شده", faExample: "فارسی: \"از او ممانعت شد.\"" },
+      { de: "verbreitet", en: "widespread", example: "Die Meinung ist verbreitet.", 
+        tenses: null, prep: null, fa: "رایج", faExample: "فارسی: \"این نظر رایج است.\"" },
+      { de: "Ausgewichen", en: "evaded", example: "Er ist ausgewichen.", 
+        tenses: { präsens: "ich weiche aus", präteritum: "ich wich aus", perfekt: "ich bin ausgewichen", futur: "ich werde ausweichen" }, 
+        prep: "vor", fa: "طفره رفتن", faExample: "فارسی: \"او طفره رفت.\"" },
+      { de: "Wortgefecht", en: "verbal duel", example: "Sie hatten ein Wortgefecht.", 
+        tenses: null, prep: null, fa: "جدال لفظی", faExample: "فارسی: \"آنها جدال لفظی داشتند.\"" },
+      { de: "Fortsetzen", en: "continue", example: "Wir setzen fort.", 
+        tenses: { präsens: "ich setze fort", präteritum: "ich setzte fort", perfekt: "ich habe fortgesetzt", futur: "ich werde fortsetzen" }, 
+        prep: "mit", fa: "ادامه دادن", faExample: "فارسی: \"ما ادامه می‌دهیم.\"" },
+      { de: "stöbern", en: "browse", example: "Er stöbert im Internet.", 
+        tenses: { präsens: "ich stöbere", präteritum: "ich stöberte", perfekt: "ich habe gestöbert", futur: "ich werde stöbern" }, 
+        prep: "in", fa: "مرور کردن", faExample: "فارسی: \"او در اینترنت مرور می‌کند.\"" },
+      { de: "Die Wahrheit wird ans Licht kommen", en: "The truth will come to light", example: "Die Wahrheit wird ans Licht kommen.", 
+        tenses: null, prep: null, fa: "حقیقت آشکار خواهد شد", faExample: "فارسی: \"حقیقت آشکار خواهد شد.\"" },
+      { de: "Betonen", en: "emphasize", example: "Sie betont die Worte.", 
+        tenses: { präsens: "ich betone", präteritum: "ich betonte", perfekt: "ich habe betont", futur: "ich werde betonen" }, 
+        prep: "auf", fa: "تأکید کردن", faExample: "فارسی: \"او بر کلمات تأکید می‌کند.\"" },
+      { de: "Schwaum", en: "foam", example: "Der Schwaum steigt.", 
+        tenses: null, prep: null, fa: "کف", faExample: "فارسی: \"کف بالا می‌آید.\"" },
+      { de: "gegen verstoßen", en: "violate against", example: "Er verstößt gegen das Gesetz.", 
+        tenses: { präsens: "ich verstoße", präteritum: "ich verstieß", perfekt: "ich habe verstoßen", futur: "ich werde verstoßen" }, 
+        prep: "gegen", fa: "نقض کردن", faExample: "فارسی: \"او قانون را نقض می‌کند.\"" },
+      { de: "Säure", en: "acid", example: "Die Säure ist stark.", 
+        tenses: null, prep: null, fa: "اسید", faExample: "فارسی: \"اسید قوی است.\"" }
+    ];
+
+    // DOM refs
+    const card = document.getElementById('card');
+    const deText = document.getElementById('deText');
+    const enText = document.getElementById('enText');
+    const exampleDe = document.getElementById('exampleDe');
+    const grammarBox = document.getElementById('grammarBox');
+    const faText = document.getElementById('faText');
+    const faExample = document.getElementById('faExample');
+    const tenseTable = document.getElementById('tenseTable');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const randomBtn = document.getElementById('randomBtn');
+    const randomBadge = document.getElementById('randomBadge');
+
+    let currentIndex = 0;
+    let randomMode = false;
+    let isFlipped = false;
+
+    function updateCard(index) {
+      const data = cardsData[index];
+      if (!data) return;
+      deText.textContent = data.de;
+      enText.textContent = data.en;
+      exampleDe.textContent = `"${data.example}"`;
+      faText.textContent = data.fa;
+      faExample.textContent = data.faExample;
+
+      // Grammatik-Box bauen
+      let html = '';
+      if (data.tenses) {
+        // Verb mit Zeitformen
+        html = `<strong>Verb</strong> · Stamm: ${data.de}`;
+        html += `<div class="tense-table">`;
+        const t = data.tenses;
+        html += `<div class="tense-item"><span class="tense-label">Präsens</span><span class="tense-value">${t.präsens || '—'}</span></div>`;
+        html += `<div class="tense-item"><span class="tense-label">Präteritum</span><span class="tense-value">${t.präteritum || '—'}</span></div>`;
+        html += `<div class="tense-item"><span class="tense-label">Perfekt</span><span class="tense-value">${t.perfekt || '—'}</span></div>`;
+        html += `<div class="tense-item"><span class="tense-label">Futur I</span><span class="tense-value">${t.futur || '—'}</span></div>`;
+        html += `</div>`;
+        if (data.prep) {
+          html += `<div class="prep-line">Präposition: <span>${data.prep}</span></div>`;
+        }
+      } else {
+        // Nomen, Adjektiv, Idiom
+        let g = data.grammar || '';
+        if (!g) {
+          if (data.prep) g = `Präposition: ${data.prep}`;
+          else g = '—';
+        }
+        html = g.replace(/\n/g, '<br>');
+      }
+      grammarBox.innerHTML = html;
+
+      if (isFlipped) {
+        card.classList.remove('flipped');
+        isFlipped = false;
+      }
+    }
+
+    function speakText(text, lang) {
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang;
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // speaker events
+    document.getElementById('speakDe').addEventListener('click', (e) => {
+      e.stopPropagation();
+      speakText(deText.textContent, 'de-DE');
+    });
+    document.getElementById('speakEn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      speakText(enText.textContent, 'en-US');
+    });
+    document.getElementById('speakFa').addEventListener('click', (e) => {
+      e.stopPropagation();
+      speakText(faText.textContent, 'fa-IR');
+    });
+
+    document.getElementById('cardWrapper').addEventListener('click', (e) => {
+      if (e.target.closest('.speaker')) return;
+      card.classList.toggle('flipped');
+      isFlipped = card.classList.contains('flipped');
+    });
+
+    function nextCard() {
+      if (randomMode) {
+        currentIndex = Math.floor(Math.random() * cardsData.length);
+      } else {
+        currentIndex = (currentIndex + 1) % cardsData.length;
+      }
+      updateCard(currentIndex);
+    }
+
+    function prevCard() {
+      if (randomMode) {
+        currentIndex = Math.floor(Math.random() * cardsData.length);
+      } else {
+        currentIndex = (currentIndex - 1 + cardsData.length) % cardsData.length;
+      }
+      updateCard(currentIndex);
+    }
+
+    function randomCard() {
+      currentIndex = Math.floor(Math.random() * cardsData.length);
+      updateCard(currentIndex);
+    }
+
+    function toggleRandomMode() {
+      randomMode = !randomMode;
+      if (randomMode) {
+        randomBadge.innerHTML = '<span class="random-mode-badge">🎲 ZUFALLS-MODUS</span>';
+        randomBtn.style.background = '#4ade80';
+        randomBtn.style.borderColor = '#4ade80';
+        randomBtn.textContent = '🎲 Zufall AN';
+      } else {
+        randomBadge.innerHTML = '';
+        randomBtn.style.background = '#fbbf24';
+        randomBtn.style.borderColor = '#fbbf24';
+        randomBtn.textContent = '🎲 Zufall';
+      }
+    }
+
+    prevBtn.addEventListener('click', prevCard);
+    nextBtn.addEventListener('click', nextCard);
+    randomBtn.addEventListener('click', randomCard);
+    randomBtn.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      toggleRandomMode();
+    });
+
+    // initial
+    updateCard(0);
+  })();
+</script>
+</body>
+</html>

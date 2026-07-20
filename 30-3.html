@@ -1,0 +1,619 @@
+ <!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Persisch-Deutsch Lernkarten: Wortschatz Meister</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none; /* Verhindert ungewolltes Markieren auf Karten */
+        }
+
+        body {
+            background: #0a0f1a;
+            font-family: 'Segoe UI', 'Roboto', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        /* Hauptcontainer */
+        .app-container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Karten-Container */
+        .card-wrapper {
+            perspective: 1500px;
+            margin-bottom: 2rem;
+            cursor: pointer;
+        }
+
+        .card {
+            background: #1e2a2a;
+            border-radius: 2rem;
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(212, 175, 55, 0.2);
+            transition: transform 0.4s ease, box-shadow 0.2s;
+            transform-style: preserve-3d;
+            position: relative;
+            width: 100%;
+            min-height: 500px;
+            cursor: pointer;
+        }
+
+        /* Dreh-Effekt */
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 2rem;
+            padding: 2rem 1.8rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 1rem;
+            overflow-y: auto;
+        }
+
+        .card-front {
+            background: linear-gradient(145deg, #1f2c2c 0%, #162020 100%);
+            color: #f0f0f0;
+            transform: rotateY(0deg);
+        }
+
+        .card-back {
+            background: linear-gradient(145deg, #162725 0%, #0e1c1a 100%);
+            color: #e6f7e6;
+            transform: rotateY(180deg);
+            direction: rtl; /* Persische Schrift grundsätzlich RTL */
+            font-family: 'Vazirmatn', 'Tahoma', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* Schriften & Farben */
+        .deutsch-word {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            background: linear-gradient(135deg, #FFD966, #e6b422);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            border-left: 4px solid #e6b422;
+            padding-left: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .persisch-word {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #a3e4a3;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            border-right: 4px solid #c5a028;
+            padding-right: 1rem;
+            margin-bottom: 0.75rem;
+            word-break: break-word;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            color: #d4af37;
+            margin-top: 0.8rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .example-sentence {
+            background: rgba(0, 0, 0, 0.35);
+            padding: 0.8rem;
+            border-radius: 1.2rem;
+            font-style: italic;
+            border-left: 3px solid #d4af37;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .grammar-block {
+            background: rgba(212, 175, 55, 0.08);
+            border-radius: 1.2rem;
+            padding: 0.8rem;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        .conjugation-table {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .pronoun {
+            font-weight: 700;
+            color: #e6b422;
+        }
+
+        .steigerung span {
+            display: inline-block;
+            background: #2a3b3b;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            margin-right: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        hr {
+            border-color: #d4af3740;
+            margin: 0.5rem 0;
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        button {
+            background: #2c3e3e;
+            border: none;
+            color: #f5e7c8;
+            font-weight: 600;
+            padding: 0.8rem 1.5rem;
+            border-radius: 3rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            backdrop-filter: blur(2px);
+        }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        .btn-gold {
+            background: #b8860b;
+            color: #0a0f1a;
+            font-weight: bold;
+        }
+
+        .btn-gold:hover {
+            background: #d4af37;
+        }
+
+        .counter {
+            text-align: center;
+            color: #c0b48a;
+            margin-top: 1.2rem;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        /* Zufallsmodus Hinweis */
+        .random-mode-badge {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.7rem;
+            color: #d4af37aa;
+        }
+
+        /* Scrollbar inside cards */
+        .card-front::-webkit-scrollbar, .card-back::-webkit-scrollbar {
+            width: 4px;
+        }
+        .card-front::-webkit-scrollbar-track {
+            background: #1f2c2c;
+        }
+        .card-front::-webkit-scrollbar-thumb {
+            background: #d4af37;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 550px) {
+            .card-front, .card-back {
+                padding: 1.5rem;
+            }
+            .deutsch-word {
+                font-size: 1.8rem;
+            }
+            .persisch-word {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="card-wrapper" id="cardWrapper">
+        <div class="card" id="flashcard">
+            <div class="card-front" id="cardFront">
+                <!-- dynamisch befüllt -->
+            </div>
+            <div class="card-back" id="cardBack">
+                <!-- dynamisch befüllt -->
+            </div>
+        </div>
+    </div>
+
+    <div class="nav-buttons">
+        <button id="prevBtn">◀ Vorige</button>
+        <button id="randomBtn" class="btn-gold">🎲 Zufall</button>
+        <button id="nextBtn">Nächste ▶</button>
+    </div>
+    <div class="counter" id="counterText">Karte 1 / 31</div>
+    <div class="random-mode-badge" id="randomModeBadge">⚡ Zufallsmodus: AUS (Rechtsklick auf Zufall)</div>
+</div>
+
+<script>
+    // ---------- DATENBANK: ALLE WÖRTER (31 Einträge) ----------
+    const cardsData = [
+        {   // 1 anlegen (Verb)
+            de: "anlegen", type: "verb",
+            deExample: "Er möchte einen Gemüsegarten anlegen.",
+            stems: "legt an – legte an – angelegt",
+            conjugation: { ich:"lege an", du:"legst an", er:"legt an", wir:"legen an", ihr:"legt an", sie:"legen an" },
+            fa: "ایجاد کردن / راه‌انداختن",
+            faExample: "او می‌خواهد یک باغ سبزی ایجاد کند."
+        },
+        {   // 2 betroffen (Adjektiv)
+            de: "betroffen", type: "adj",
+            deExample: "Die betroffenen Familien brauchen Hilfe.",
+            comparative: "betroffener – am betroffensten",
+            fa: "متأثر / مربوطه",
+            faExample: "خانواده‌های متأثر به کمک نیاز دارند."
+        },
+        {   // 3 bilingual
+            de: "bilingual", type: "adj",
+            deExample: "Sie wächst bilingual auf.",
+            comparative: "– (nicht steigerbar)",
+            fa: "دوزبانه",
+            faExample: "او به صورت دوزبانه بزرگ می‌شود."
+        },
+        {   // 4 Fließend
+            de: "fließend", type: "adj",
+            deExample: "Er spricht fließend Persisch.",
+            comparative: "fließender – am fließendsten",
+            fa: "روان (صحبت کردن)",
+            faExample: "او فارسی را روان صحبت می‌کند."
+        },
+        {   // 5 herumschlagen (Verb)
+            de: "herumschlagen", type: "verb",
+            deExample: "Er schlägt sich mit Bürokratie herum.",
+            stems: "schlägt herum – schlug herum – herumgeschlagen",
+            conjugation: { ich:"schlage herum", du:"schlägst herum", er:"schlägt herum", wir:"schlagen herum", ihr:"schlagt herum", sie:"schlagen herum" },
+            fa: "دست و پنجه نرم کردن / کلنجار رفتن",
+            faExample: "او با بوروکراسی دست و پنجه نرم می‌کند."
+        },
+        {   // 6 Kinderleicht
+            de: "kinderleicht", type: "adj",
+            deExample: "Die Aufgabe war kinderleicht.",
+            comparative: "– (keine Steigerung üblich)",
+            fa: "بسیار آسان / کودکانه ساده",
+            faExample: "انجام آن کار بسیار آسان بود."
+        },
+        {   // 7 Körpersignal
+            de: "Körpersignal", type: "noun", article: "das", plural: "Körpersignale",
+            deExample: "Seine Körpersignale zeigten Unsicherheit.",
+            fa: "علامت بدنی / زبان بدن",
+            faExample: "علامت‌های بدنی او عدم اطمینان را نشان می‌داد."
+        },
+        {   // 8 wesentlich
+            de: "wesentlich", type: "adj",
+            deExample: "Das ist ein wesentlicher Unterschied.",
+            comparative: "wesentlicher – am wesentlichsten",
+            fa: "اساسی / مهم",
+            faExample: "این یک تفاوت اساسی است."
+        },
+        {   // 9 instinktiv
+            de: "instinktiv", type: "adj",
+            deExample: "Er reagierte instinktiv.",
+            comparative: "–",
+            fa: "غریزی",
+            faExample: "او واکنش غریزی نشان داد."
+        },
+        {   // 10 Mimik
+            de: "Mimik", type: "noun", article: "die", plural: "– (Singularetantum)",
+            deExample: "Ihre Mimik verriet sie.",
+            fa: "حالات چهره",
+            faExample: "حالات چهره او را لو داد."
+        },
+        {   // 11 vorgeben (Verb)
+            de: "vorgeben", type: "verb",
+            deExample: "Er gibt vor, krank zu sein.",
+            stems: "gibt vor – gab vor – vorgegeben",
+            conjugation: { ich:"gebe vor", du:"gibst vor", er:"gibt vor", wir:"geben vor", ihr:"gebt vor", sie:"geben vor" },
+            fa: "وانمود کردن / ادعا کردن",
+            faExample: "او وانمود می‌کند مریض است."
+        },
+        {   // 12 eindeutig
+            de: "eindeutig", type: "adj",
+            deExample: "Eine eindeutige Antwort.",
+            comparative: "eindeutiger – am eindeutigsten",
+            fa: "واضح / بدون ابهام",
+            faExample: "یک پاسخ واضح."
+        },
+        {   // 13 senken (Verb)
+            de: "senken", type: "verb",
+            deExample: "Die Firma senkt die Preise.",
+            stems: "senkt – senkte – gesenkt",
+            conjugation: { ich:"senke", du:"senkst", er:"senkt", wir:"senken", ihr:"senkt", sie:"senken" },
+            fa: "کاهش دادن / پایین آوردن",
+            faExample: "شرکت قیمت‌ها را کاهش می‌دهد."
+        },
+        {   // 14 Nachweisen
+            de: "nachweisen", type: "verb",
+            deExample: "Der Forscher wies die Theorie nach.",
+            stems: "weist nach – wies nach – nachgewiesen",
+            conjugation: { ich:"weise nach", du:"weist nach", er:"weist nach", wir:"weisen nach", ihr:"weist nach", sie:"weisen nach" },
+            fa: "اثبات کردن",
+            faExample: "محقق این نظریه را اثبات کرد."
+        },
+        {   // 15 Phase-n (Plural) -> Nomen
+            de: "Phase", type: "noun", article: "die", plural: "Phasen",
+            deExample: "Das Projekt hat mehrere Phasen.",
+            fa: "مرحله / فاز",
+            faExample: "این پروژه چندین مرحله دارد."
+        },
+        {   // 16 Psychologe-in-n-en (wir behandeln als Nomen Psychologe)
+            de: "Psychologe", type: "noun", article: "der", plural: "Psychologen",
+            deExample: "Der Psychologe half dem Kind.",
+            fa: "روانشناس",
+            faExample: "روانشناس به کودک کمک کرد."
+        },
+        {   // 17 schwerfallen
+            de: "schwerfallen", type: "verb",
+            deExample: "Mathe fällt mir schwer.",
+            stems: "fällt schwer – fiel schwer – schwergefallen",
+            conjugation: { ich:"falle schwer", du:"fällst schwer", er:"fällt schwer", wir:"fallen schwer", ihr:"fallt schwer", sie:"fallen schwer" },
+            fa: "سخت بودن / دشوار بودن",
+            faExample: "ریاضی برایم سخت است."
+        },
+        {   // 18 Sprachenpolitik
+            de: "Sprachenpolitik", type: "noun", article: "die", plural: "–",
+            deExample: "Die EU verfolgt eine mehrsprachige Sprachenpolitik.",
+            fa: "سیاست زبانی",
+            faExample: "اتحادیه اروپا سیاست زبانی چندزبانه را دنبال می‌کند."
+        },
+        {   // 19 Sprachenwicklung (Schreibfehler? aber gemeint: Sprachentwicklung)
+            de: "Sprachentwicklung", type: "noun", article: "die", plural: "–",
+            deExample: "Die Sprachentwicklung bei Kindern ist wichtig.",
+            fa: "توسعه زبانی",
+            faExample: "توسعه زبانی در کودکان مهم است."
+        },
+        {   // 20 Sprachwissenschaftler
+            de: "Sprachwissenschaftler", type: "noun", article: "der", plural: "Sprachwissenschaftler",
+            deExample: "Der Sprachwissenschaftler forscht zu Dialekten.",
+            fa: "زبان‌شناس",
+            faExample: "زبان‌شناس در مورد گویش‌ها تحقیق می‌کند."
+        },
+        {   // 21 überforden (überfordern)
+            de: "überfordern", type: "verb",
+            deExample: "Die Aufgabe überfordert die Schüler.",
+            stems: "überfordert – überforderte – überfordert",
+            conjugation: { ich:"überfordere", du:"überforderst", er:"überfordert", wir:"überfordern", ihr:"überfordert", sie:"überfordern" },
+            fa: "فشار زیاد آوردن / از توان خارج کردن",
+            faExample: "این تمرین دانش‌آموزان را از توان خارج می‌کند."
+        },
+        {   // 22 bettelt (Verb betteln)
+            de: "betteln", type: "verb",
+            deExample: "Das Kind bettelt um Süßigkeiten.",
+            stems: "bettelt – bettelte – gebettelt",
+            conjugation: { ich:"bettele", du:"bettelst", er:"bettelt", wir:"betteln", ihr:"bettelt", sie:"betteln" },
+            fa: "گدایی کردن / التماس کردن",
+            faExample: "کودک برای شیرینی التماس می‌کند."
+        },
+        {   // 23 komplex
+            de: "komplex", type: "adj",
+            deExample: "Ein komplexes Problem.",
+            comparative: "komplexer – am komplexesten",
+            fa: "پیچیده",
+            faExample: "یک مسئله پیچیده."
+        },
+        {   // 24 Konfrontieren
+            de: "konfrontieren", type: "verb",
+            deExample: "Sie konfrontierte ihn mit der Wahrheit.",
+            stems: "konfrontiert – konfrontierte – konfrontiert",
+            conjugation: { ich:"konfrontiere", du:"konfrontierst", er:"konfrontiert", wir:"konfrontieren", ihr:"konfrontiert", sie:"konfrontieren" },
+            fa: "روبرو کردن / مواجه ساختن",
+            faExample: "او او را با حقیقت روبرو کرد."
+        },
+        {   // 25 multikulturelle (Adjektiv)
+            de: "multikulturell", type: "adj",
+            deExample: "Eine multikulturelle Gesellschaft.",
+            comparative: "–",
+            fa: "چندفرهنگی",
+            faExample: "جامعه چندفرهنگی."
+        },
+        {   // 26 trösten
+            de: "trösten", type: "verb",
+            deExample: "Die Mutter tröstet ihr Kind.",
+            stems: "tröstet – tröstete – getröstet",
+            conjugation: { ich:"tröste", du:"tröstest", er:"tröstet", wir:"trösten", ihr:"tröstet", sie:"trösten" },
+            fa: "تسلی دادن / دلداری دادن",
+            faExample: "مادر به کودکش دلداری می‌دهد."
+        },
+        {   // 27 Vertrauheit (Schafft) – Substantiv
+            de: "Vertrautheit", type: "noun", article: "die", plural: "–",
+            deExample: "Die Vertrautheit schafft Geborgenheit.",
+            fa: "آشنایی / صمیمیت",
+            faExample: "آشنایی باعث ایجاد امنیت خاطر می‌شود."
+        },
+        {   // 28 Verwaltungssprache
+            de: "Verwaltungssprache", type: "noun", article: "die", plural: "Verwaltungssprachen",
+            deExample: "Deutsch ist oft die Verwaltungssprache.",
+            fa: "زبان اداری",
+            faExample: "آلمانی اغلب زبان اداری است."
+        },
+        {   // 29 Vielfalt
+            de: "Vielfalt", type: "noun", article: "die", plural: "–",
+            deExample: "Die kulturelle Vielfalt ist bereichernd.",
+            fa: "تنوع",
+            faExample: "تنوع فرهنگی غنی‌بخش است."
+        },
+        {   // 30 Lnadesgesetze (Landesgesetze)
+            de: "Landesgesetze", type: "noun", article: "die", plural: "Landesgesetze (Pl.)",
+            deExample: "Die Landesgesetze variieren von Bundesland zu Bundesland.",
+            fa: "قوانین ایالتی",
+            faExample: "قوانین ایالتی از ایالت به ایالت متفاوت است."
+        },
+        {   // 31 zusätzlich: der Vollständigkeit (herumschlagen schon da) -> aber Liste hatte 31 Einträge genau.
+            // 31 ist 'Landesgesetze' – oben erfasst. alles ok.
+        }
+    ];
+    // Index-Korrektur: letzter Eintrag sicherstellen
+    // Der letzte manuelle Eintrag "Landesgesetze" ist index 30 (0-based)
+    
+    // ----- Globale Variablen -----
+    let currentIndex = 0;
+    let randomMode = false;      // false = sequenziell, true = zufällige Karte (aber ohne Wiederholungslogik vereinfacht)
+    let originalOrder = [...cardsData]; // für Reset bei Bedarf nicht nötig, wir nutzen randomMode flag
+
+    // DOM Elemente
+    const cardFront = document.getElementById('cardFront');
+    const cardBack = document.getElementById('cardBack');
+    const flashcard = document.getElementById('flashcard');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const randomBtn = document.getElementById('randomBtn');
+    const counterText = document.getElementById('counterText');
+    const randomModeBadge = document.getElementById('randomModeBadge');
+
+    // Hilfsfunktion: Konjugation HTML
+    function renderConjugation(verbData) {
+        if (!verbData.conjugation) return '';
+        const c = verbData.conjugation;
+        return `<div class="conjugation-table">
+            <span class="pronoun">ich</span><span>${c.ich}</span>
+            <span class="pronoun">du</span><span>${c.du}</span>
+            <span class="pronoun">er/sie/es</span><span>${c.er}</span>
+            <span class="pronoun">wir</span><span>${c.wir}</span>
+            <span class="pronoun">ihr</span><span>${c.ihr}</span>
+            <span class="pronoun">sie/Sie</span><span>${c.sie}</span>
+        </div>`;
+    }
+
+    // Vorderseite befüllen (DEUTSCH)
+    function renderFront(card) {
+        let html = `<div class="deutsch-word">${card.de}</div>`;
+        // Beispielsatz
+        html += `<div class="section-title">📖 BEISPIEL</div><div class="example-sentence">${card.deExample || "Kein Beispielsatz angegeben."}</div>`;
+        
+        // Grammatik: Verb, Nomen, Adjektiv
+        html += `<div class="section-title">📚 GRAMMATIK</div><div class="grammar-block">`;
+        if (card.type === 'verb') {
+            html += `<strong>🔹 Stammformen:</strong> ${card.stems || '—'}<br>`;
+            html += `<strong>🔹 Präsens Konjugation:</strong>${renderConjugation(card)}`;
+        } 
+        else if (card.type === 'noun') {
+            html += `<strong>🔹 Artikel:</strong> ${card.article || '?'}<br>`;
+            html += `<strong>🔹 Plural:</strong> ${card.plural || '—'}`;
+        }
+        else if (card.type === 'adj') {
+            html += `<strong>🔹 Steigerung:</strong> ${card.comparative || 'positiv – komparativ – superlativ (keine Angabe)'}`;
+        }
+        else {
+            html += `<em>Standardwortart</em>`;
+        }
+        html += `</div>`;
+        return html;
+    }
+
+    // Rückseite (Persisch)
+    function renderBack(card) {
+        return `<div class="persisch-word">${card.fa || 'ترجمه موجود نیست'}</div>
+                <div class="section-title">📖 مثال (جمله)</div>
+                <div class="example-sentence" style="direction:rtl; text-align:right;">${card.faExample || 'جمله نمونه در دسترس نیست.'}</div>`;
+    }
+
+    function updateCard() {
+        const currentCard = cardsData[currentIndex];
+        if (!currentCard) return;
+        cardFront.innerHTML = renderFront(currentCard);
+        cardBack.innerHTML = renderBack(currentCard);
+        counterText.innerText = `Karte ${currentIndex+1} / ${cardsData.length}`;
+        // Flip zurücksetzen, falls umgedreht
+        flashcard.classList.remove('flipped');
+    }
+
+    // Nächste Karte (sequenziell oder zufall je nach Modus)
+    function nextCard() {
+        if (randomMode) {
+            let newIndex = Math.floor(Math.random() * cardsData.length);
+            while (cardsData.length > 1 && newIndex === currentIndex) {
+                newIndex = Math.floor(Math.random() * cardsData.length);
+            }
+            currentIndex = newIndex;
+        } else {
+            currentIndex = (currentIndex + 1) % cardsData.length;
+        }
+        updateCard();
+    }
+
+    function prevCard() {
+        if (randomMode) {
+            let newIndex = Math.floor(Math.random() * cardsData.length);
+            while (cardsData.length > 1 && newIndex === currentIndex) {
+                newIndex = Math.floor(Math.random() * cardsData.length);
+            }
+            currentIndex = newIndex;
+        } else {
+            currentIndex = (currentIndex - 1 + cardsData.length) % cardsData.length;
+        }
+        updateCard();
+    }
+
+    function randomCard() {
+        let rand = Math.floor(Math.random() * cardsData.length);
+        currentIndex = rand;
+        updateCard();
+    }
+
+    // Zufallsmodus umschalten (Rechtsklick)
+    function toggleRandomMode(event) {
+        event.preventDefault();  // Kontextmenü unterdrücken
+        randomMode = !randomMode;
+        if (randomMode) {
+            randomModeBadge.innerHTML = '🎲 Zufallsmodus: EIN (Karten werden zufällig ausgewählt)';
+            randomModeBadge.style.color = '#ffd966';
+        } else {
+            randomModeBadge.innerHTML = '⚡ Zufallsmodus: AUS (Rechtsklick auf Zufall)';
+            randomModeBadge.style.color = '#c0b48a';
+        }
+        // Aktuelle Karte bleibt, aber Navigation verhält sich neu
+    }
+
+    // Eventlistener
+    prevBtn.addEventListener('click', prevCard);
+    nextBtn.addEventListener('click', nextCard);
+    randomBtn.addEventListener('click', randomCard);
+    randomBtn.addEventListener('contextmenu', toggleRandomMode);
+    
+    // Karten-Drehen per Klick
+    flashcard.addEventListener('click', (e) => {
+        // Verhindert, dass wenn auf Buttons innerhalb der Karte geklickt wird, nicht flippt.
+        if (e.target.closest('button')) return;
+        flashcard.classList.toggle('flipped');
+    });
+
+    // Initialisierung
+    updateCard();
+</script>
+</body>
+</html>

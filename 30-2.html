@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Persisch-Deutsch Lernkarten - Premium</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29, #1a1a3e, #24243e);
+            font-family: 'Segoe UI', 'Noto Sans', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app {
+            max-width: 650px;
+            width: 100%;
+        }
+
+        .card-container {
+            perspective: 1200px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border-radius: 32px;
+            min-height: 580px;
+            padding: 25px 22px;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(255,215,0,0.3);
+            position: relative;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .card-front, .card-back {
+            transition: opacity 0.3s ease;
+        }
+
+        .card-back {
+            display: none;
+        }
+
+        .card.flipped .card-front {
+            display: none;
+        }
+
+        .card.flipped .card-back {
+            display: block;
+        }
+
+        .badge {
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #f39c12;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+
+        .word-german {
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+            margin: 5px 0 15px 0;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .article-plural {
+            font-size: 15px;
+            color: #ffd966;
+            margin-bottom: 15px;
+            background: rgba(255,215,0,0.1);
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .example-sentence {
+            background: rgba(255,255,255,0.05);
+            padding: 12px 15px;
+            border-radius: 16px;
+            margin: 15px 0;
+            border-left: 4px solid #f39c12;
+        }
+
+        .example-label {
+            font-size: 11px;
+            color: #f39c12;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        .example-text {
+            font-size: 14px;
+            color: #ddd;
+            line-height: 1.4;
+            font-style: italic;
+        }
+
+        .forms-box {
+            background: rgba(46,204,113,0.1);
+            padding: 12px 15px;
+            border-radius: 16px;
+            margin: 15px 0;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .forms-label {
+            font-size: 11px;
+            color: #2ecc71;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        .forms-text {
+            font-size: 16px;
+            color: #ffd966;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .conjugation-box {
+            background: rgba(231,76,60,0.1);
+            padding: 12px 15px;
+            border-radius: 16px;
+            margin: 15px 0;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .conjugation-label {
+            font-size: 11px;
+            color: #e74c3c;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .conjugation-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 5px 12px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .conjugation-pronoun {
+            font-weight: bold;
+            color: #ffd966;
+        }
+
+        .persian {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2ecc71;
+            margin: 20px 0;
+            direction: rtl;
+            font-family: 'Noto Naskh Arabic', 'Segoe UI', Tahoma, sans-serif;
+            word-break: break-word;
+            text-align: right;
+        }
+
+        .example-persian {
+            background: rgba(255,255,255,0.05);
+            padding: 12px 15px;
+            border-radius: 16px;
+            margin-top: 20px;
+        }
+
+        .example-persian-text {
+            direction: rtl;
+            font-family: 'Noto Naskh Arabic', sans-serif;
+            color: #2ecc71;
+            font-size: 16px;
+            text-align: right;
+        }
+
+        .hint-flip {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: 20px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            background: #e94560;
+            color: white;
+            transition: 0.2s;
+            box-shadow: 0 5px 15px rgba(233,69,96,0.3);
+        }
+
+        button.secondary {
+            background: #0f3460;
+            color: #e94560;
+            border: 1px solid #e94560;
+        }
+
+        button.random {
+            background: #2c3e66;
+            color: #f39c12;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+
+        .counter {
+            text-align: center;
+            color: #ccc;
+            font-size: 16px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .mode-badge {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #f39c12;
+        }
+
+        hr {
+            border-color: rgba(255,215,0,0.2);
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="card-container">
+        <div class="card" id="flashcard">
+            <!-- VORDERSEITE (Deutsch) -->
+            <div class="card-front" id="frontSide">
+                <div class="badge" id="typeBadge">⚡ Verb</div>
+                <div class="word-german" id="germanWord">schmoren</div>
+                <div class="article-plural" id="articlePlural" style="display: none;"></div>
+                
+                <div class="example-sentence">
+                    <div class="example-label">📖 Beispielsatz</div>
+                    <div class="example-text" id="exampleDe">Das Fleisch schmort seit zwei Stunden in der Pfanne.</div>
+                </div>
+                
+                <div class="forms-box">
+                    <div class="forms-label">📚 Stammformen (Infinitiv - Präteritum - Perfekt)</div>
+                    <div class="forms-text" id="formsInfo">schmort – schmorte – geschmort</div>
+                </div>
+                
+                <div class="conjugation-box">
+                    <div class="conjugation-label">🔤 Konjugation (Präsens)</div>
+                    <div class="conjugation-grid" id="conjugationGrid">
+                        <span class="conjugation-pronoun">ich</span><span>schmore</span>
+                        <span class="conjugation-pronoun">du</span><span>schmorst</span>
+                        <span class="conjugation-pronoun">er/sie/es</span><span>schmort</span>
+                        <span class="conjugation-pronoun">wir</span><span>schmoren</span>
+                        <span class="conjugation-pronoun">ihr</span><span>schmort</span>
+                        <span class="conjugation-pronoun">Sie/sie</span><span>schmoren</span>
+                    </div>
+                </div>
+                
+                <div class="hint-flip">👆 Tippen zum Umdrehen (Persisch)</div>
+            </div>
+            
+            <!-- RÜCKSEITE (Persisch) -->
+            <div class="card-back" id="backSide">
+                <div class="badge">🇮🇷 ترجمه فارسی</div>
+                <div class="persian" id="persianWord">آهسته پختن</div>
+                
+                <div class="example-persian">
+                    <div class="example-label">📖 Beispielsatz (Persisch)</div>
+                    <div class="example-persian-text" id="exampleFa">گوشت دو ساعت است که در تابه آهسته می‌پزد.</div>
+                </div>
+                
+                <hr>
+                <div class="example-label" style="margin-top: 15px;">📖 Beispielsatz (Deutsch)</div>
+                <div class="example-text" id="exampleDeBack" style="margin-top: 5px;">Das Fleisch schmort seit zwei Stunden in der Pfanne.</div>
+                
+                <div class="hint-flip">👆 Tippen zum Zurück</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="counter" id="counter">1 / 31</div>
+    <div class="nav-buttons">
+        <button class="secondary" id="prevBtn">◀ Vorige</button>
+        <button class="random" id="randomBtn">🎲 Zufall</button>
+        <button id="nextBtn">Nächste ▶</button>
+    </div>
+    <div class="mode-badge" id="modeIndicator">📋 Modus: Normal</div>
+    <div class="hint-flip">💡 Tipp: Auf Karte tippen = Deutsch/Persisch umdrehen</div>
+</div>
+
+<script>
+    // ==============================================================
+    // ALLE DEINE WÖRTER
+    // ==============================================================
+    
+    const cardsData = [
+        {
+            type: "Verb",
+            german: "schmoren",
+            article: "",
+            plural: "",
+            exampleDe: "Das Fleisch schmort seit zwei Stunden in der Pfanne.",
+            forms: "schmort – schmorte – geschmort",
+            conjugation: {
+                ich: "schmore",
+                du: "schmorst",
+                er: "schmort",
+                wir: "schmoren",
+                ihr: "schmort",
+                sie: "schmoren"
+            },
+            persian: "آهسته پختن",
+            exampleFa: "گوشت دو ساعت است که در تابه آهسته می‌پزد."
+        },
+        {
+            type: "Nomen",
+            german: "Geschmacksexplosion",
+            article: "die",
+            plural: "Geschmacksexplosionen",
+            exampleDe: "Dieses Dessert ist eine echte Geschmacksexplosion.",
+            forms: "",
+            conjugation: null,
+            persian: "انفجار طعم",
+            exampleFa: "این دسر یک انفجار طعم واقعی است."
+        },
+        {
+            type: "Adjektiv",
+            german: "pervers",
+            article: "",
+            plural: "",
+            exampleDe: "Das war ein perverser Gedanke.",
+            forms: "pervers – perverser – am perversesten",
+            conjugation: null,
+            persian: "منحرف",
+            exampleFa: "این یک فکر منحرف بود."
+        },
+        {
+            type: "Adjektiv",
+            german: "konsequent",
+            article: "",
+            plural: "",
+            exampleDe: "Er ist sehr konsequent in seiner Arbeit.",
+            forms: "konsequent – konsequenter – am konsequentesten",
+            conjugation: null,
+            persian: "مستمر / پیگیر",
+            exampleFa: "او در کارش بسیار پیگیر است."
+        },
+        {
+            type: "Nomen",
+            german: "Moderator",
+            article: "der",
+            plural: "Moderatoren",
+            exampleDe: "Der Moderator stellte interessante Fragen.",
+            forms: "",
+            conjugation: null,
+            persian: "مجری",
+            exampleFa: "مجری سوالات جالبی پرسید."
+        },
+        {
+            type: "Nomen",
+            german: "Kindertagesstätte",
+            article: "die",
+            plural: "Kindertagesstätten",
+            exampleDe: "Die Kindertagesstätte hat neue Spielsachen.",
+            forms: "",
+            conjugation: null,
+            persian: "مهدکودک",
+            exampleFa: "مهدکودک اسباب‌بازی‌های جدید دارد."
+        },
+        {
+            type: "Nomen",
+            german: "Himmelsrichtungen",
+            article: "die",
+            plural: "Himmelsrichtungen",
+            exampleDe: "Nord, Süd, Ost, West sind die Himmelsrichtungen.",
+            forms: "",
+            conjugation: null,
+            persian: "جهت‌های اصلی",
+            exampleFa: "شمال، جنوب، شرق، غرب جهت‌های اصلی هستند."
+        },
+        {
+            type: "Adjektiv",
+            german: "konservativ",
+            article: "",
+            plural: "",
+            exampleDe: "Er hat eine konservative Einstellung.",
+            forms: "konservativ – konservativer – am konservativsten",
+            conjugation: null,
+            persian: "محافظه‌کار",
+            exampleFa: "او طرز فکر محافظه‌کاری دارد."
+        },
+        {
+            type: "Nomen",
+            german: "Minister",
+            article: "der",
+            plural: "Minister",
+            exampleDe: "Der Minister hielt eine Rede.",
+            forms: "",
+            conjugation: null,
+            persian: "وزیر",
+            exampleFa: "وزیر سخنرانی کرد."
+        },
+        {
+            type: "Nomen",
+            german: "Insekt",
+            article: "das",
+            plural: "Insekten",
+            exampleDe: "Dieses Insekt hat bunte Flügel.",
+            forms: "",
+            conjugation: null,
+            persian: "حشره",
+            exampleFa: "این حشره بال‌های رنگارنگی دارد."
+        },
+        {
+            type: "Nomen",
+            german: "Fliege",
+            article: "die",
+            plural: "Fliegen",
+            exampleDe: "Eine Fliege summt im Zimmer.",
+            forms: "",
+            conjugation: null,
+            persian: "مگس",
+            exampleFa: "یک مگس در اتاق وزوز می‌کند."
+        },
+        {
+            type: "Nomen",
+            german: "Mücke",
+            article: "die",
+            plural: "Mücken",
+            exampleDe: "Die Mücke sticht mich.",
+            forms: "",
+            conjugation: null,
+            persian: "پشه",
+            exampleFa: "پشه من را نیش می‌زند."
+        },
+        {
+            type: "Nomen",
+            german: "Schildkröte",
+            article: "die",
+            plural: "Schildkröten",
+            exampleDe: "Die Schildkröte ist langsam.",
+            forms: "",
+            conjugation: null,
+            persian: "لاک‌پشت",
+            exampleFa: "لاک‌پشت آهسته است."
+        },
+        {
+            type: "Verb",
+            german: "auflösen",
+            article: "",
+            plural: "",
+            exampleDe: "Der Zucker löst sich im Wasser auf.",
+            forms: "löst auf – löste auf – aufgelöst",
+            conjugation: {
+                ich: "löse auf",
+                du: "löst auf",
+                er: "löst auf",
+                wir: "lösen auf",
+                ihr: "löst auf",
+                sie: "lösen auf"
+            },
+            persian: "حل کردن",
+            exampleFa: "شکر در آب حل می‌شود."
+        },
+        {
+            type: "Verb",
+            german: "eröffnen",
+            article: "",
+            plural: "",
+            exampleDe: "Sie eröffnen morgen ein neues Geschäft.",
+            forms: "eröffnet – eröffnete – eröffnet",
+            conjugation: {
+                ich: "eröffne",
+                du: "eröffnest",
+                er: "eröffnet",
+                wir: "eröffnen",
+                ihr: "eröffnet",
+                sie: "eröffnen"
+            },
+            persian: "گشودن / افتتاح کردن",
+            exampleFa: "آنها فردا یک فروشگاه جدید افتتاح می‌کنند."
+        },
+        {
+            type: "Verb",
+            german: "knüpfen",
+            article: "",
+            plural: "",
+            exampleDe: "Er knüpft neue Kontakte.",
+            forms: "knüpft – knüpfte – geknüpft",
+            conjugation: {
+                ich: "knüpfe",
+                du: "knüpfst",
+                er: "knüpft",
+                wir: "knüpfen",
+                ihr: "knüpft",
+                sie: "knüpfen"
+            },
+            persian: "گره زدن",
+            exampleFa: "او ارتباطات جدیدی برقرار می‌کند."
+        },
+        {
+            type: "Nomen",
+            german: "Nachmieter",
+            article: "der",
+            plural: "Nachmieter",
+            exampleDe: "Wir suchen einen Nachmieter für die Wohnung.",
+            forms: "",
+            conjugation: null,
+            persian: "مستاجر بعدی",
+            exampleFa: "ما برای آپارتمان مستاجر بعدی می‌گردیم."
+        },
+        {
+            type: "Adjektiv",
+            german: "abenteuerlich",
+            article: "",
+            plural: "",
+            exampleDe: "Das war eine abenteuerliche Reise.",
+            forms: "abenteuerlich – abenteuerlicher – am abenteuerlichsten",
+            conjugation: null,
+            persian: "ماجراجویانه",
+            exampleFa: "این یک سفر ماجراجویانه بود."
+        },
+        {
+            type: "Nomen",
+            german: "Kompetenz",
+            article: "die",
+            plural: "Kompetenzen",
+            exampleDe: "Sie hat große Kompetenz in diesem Bereich.",
+            forms: "",
+            conjugation: null,
+            persian: "صلاحیت / توانایی",
+            exampleFa: "او توانایی زیادی در این زمینه دارد."
+        },
+        {
+            type: "Nomen",
+            german: "Konzentrationsleistung",
+            article: "die",
+            plural: "Konzentrationsleistungen",
+            exampleDe: "Die Konzentrationsleistung nimmt am Nachmittag ab.",
+            forms: "",
+            conjugation: null,
+            persian: "عملکرد تمرکز",
+            exampleFa: "عملکرد تمرکز بعد از ظهر کاهش می‌یابد."
+        },
+        {
+            type: "Verbphrase",
+            german: "Chaos hinterlassen",
+            article: "",
+            plural: "",
+            exampleDe: "Die Kinder haben Chaos hinterlassen.",
+            forms: "hinterlässt Chaos – hinterließ Chaos – Chaos hinterlassen",
+            conjugation: {
+                ich: "hinterlasse Chaos",
+                du: "hinterlässt Chaos",
+                er: "hinterlässt Chaos",
+                wir: "hinterlassen Chaos",
+                ihr: "hinterlasst Chaos",
+                sie: "hinterlassen Chaos"
+            },
+            persian: "هرج و مرج به جا گذاشتن",
+            exampleFa: "بچه‌ها هرج و مرج به جا گذاشتند."
+        },
+        {
+            type: "Verb",
+            german: "beschimpfen",
+            article: "",
+            plural: "",
+            exampleDe: "Er hat den Fahrer beschimpft.",
+            forms: "beschimpft – beschimpfte – beschimpft",
+            conjugation: {
+                ich: "beschimpfe",
+                du: "beschimpfst",
+                er: "beschimpft",
+                wir: "beschimpfen",
+                ihr: "beschimpft",
+                sie: "beschimpfen"
+            },
+            persian: "فحش دادن / دشنام دادن",
+            exampleFa: "او به راننده فحش داد."
+        },
+        {
+            type: "Nomen",
+            german: "Kritik",
+            article: "die",
+            plural: "Kritiken",
+            exampleDe: "Ich kann Kritik gut annehmen.",
+            forms: "",
+            conjugation: null,
+            persian: "انتقاد",
+            exampleFa: "من می‌توانم انتقاد را خوب بپذیرم."
+        },
+        {
+            type: "Verb",
+            german: "vermachen",
+            article: "",
+            plural: "",
+            exampleDe: "Er vermacht sein Haus den Kindern.",
+            forms: "vermacht – vermachte – vermacht",
+            conjugation: {
+                ich: "vermache",
+                du: "vermachst",
+                er: "vermacht",
+                wir: "vermachen",
+                ihr: "vermacht",
+                sie: "vermachen"
+            },
+            persian: "وصیت کردن",
+            exampleFa: "او خانه‌اش را به بچه‌ها وصیت می‌کند."
+        },
+        {
+            type: "Verb",
+            german: "prognostizieren",
+            article: "",
+            plural: "",
+            exampleDe: "Die Experten prognostizieren Regen.",
+            forms: "prognostiziert – prognostizierte – prognostiziert",
+            conjugation: {
+                ich: "prognostiziere",
+                du: "prognostizierst",
+                er: "prognostiziert",
+                wir: "prognostizieren",
+                ihr: "prognostiziert",
+                sie: "prognostizieren"
+            },
+            persian: "پیش‌بینی کردن",
+            exampleFa: "کارشناسان باران پیش‌بینی می‌کنند."
+        },
+        {
+            type: "Verb",
+            german: "diskriminieren",
+            article: "",
+            plural: "",
+            exampleDe: "Niemand sollte diskriminiert werden.",
+            forms: "diskriminiert – diskriminierte – diskriminiert",
+            conjugation: {
+                ich: "diskriminiere",
+                du: "diskriminierst",
+                er: "diskriminiert",
+                wir: "diskriminieren",
+                ihr: "diskriminiert",
+                sie: "diskriminieren"
+            },
+            persian: "تبعیض قائل شدن",
+            exampleFa: "هیچ کس نباید مورد تبعیض قرار گیرد."
+        },
+        {
+            type: "Verb",
+            german: "abknabbern",
+            article: "",
+            plural: "",
+            exampleDe: "Der Hund knabbert den Knochen ab.",
+            forms: "knabbert ab – knabberte ab – abgeknabbert",
+            conjugation: {
+                ich: "knabbere ab",
+                du: "knabberst ab",
+                er: "knabbert ab",
+                wir: "knabbern ab",
+                ihr: "knabbert ab",
+                sie: "knabbern ab"
+            },
+            persian: "جویدن (کم کم)",
+            exampleFa: "سگ استخوان را می‌جود."
+        },
+        {
+            type: "Verb",
+            german: "abschlecken",
+            article: "",
+            plural: "",
+            exampleDe: "Das Kind schleckt den Löffel ab.",
+            forms: "schleckt ab – schleckte ab – abgeschleckt",
+            conjugation: {
+                ich: "schlecke ab",
+                du: "schleckst ab",
+                er: "schleckt ab",
+                wir: "schlecken ab",
+                ihr: "schleckt ab",
+                sie: "schlecken ab"
+            },
+            persian: "لیس زدن",
+            exampleFa: "بچه قاشق را لیس می‌زند."
+        },
+        {
+            type: "Verb",
+            german: "schnorren",
+            article: "",
+            plural: "",
+            exampleDe: "Er hat bei mir eine Zigarette geschnorrt.",
+            forms: "schnorrt – schnorrte – geschnorrt",
+            conjugation: {
+                ich: "schnorre",
+                du: "schnorst",
+                er: "schnorrt",
+                wir: "schnorren",
+                ihr: "schnorrt",
+                sie: "schnorren"
+            },
+            persian: "گدایی کردن / چیز خواستن",
+            exampleFa: "او از من یک سیگار گدایی کرد."
+        },
+        {
+            type: "Nomen",
+            german: "Forscher",
+            article: "der",
+            plural: "Forscher",
+            exampleDe: "Der Forscher macht wichtige Entdeckungen.",
+            forms: "",
+            conjugation: null,
+            persian: "محقق",
+            exampleFa: "محقق اکتشافات مهمی انجام می‌دهد."
+        },
+        {
+            type: "Nomen",
+            german: "Forscherin",
+            article: "die",
+            plural: "Forscherinnen",
+            exampleDe: "Die Forscherin analysiert die Daten.",
+            forms: "",
+            conjugation: null,
+            persian: "محقق زن",
+            exampleFa: "محقق زن داده‌ها را تحلیل می‌کند."
+        }
+    ];
+    
+    // ==============================================================
+    // APP LOGIK
+    // ==============================================================
+    let currentIndex = 0;
+    let isRandomMode = false;
+    let originalOrder = [...cardsData];
+    let shuffledCards = [...cardsData];
+    
+    const cardEl = document.getElementById('flashcard');
+    const typeBadge = document.getElementById('typeBadge');
+    const germanWordEl = document.getElementById('germanWord');
+    const articlePluralEl = document.getElementById('articlePlural');
+    const exampleDeEl = document.getElementById('exampleDe');
+    const formsInfoEl = document.getElementById('formsInfo');
+    const conjugationGridEl = document.getElementById('conjugationGrid');
+    const persianWordEl = document.getElementById('persianWord');
+    const exampleFaEl = document.getElementById('exampleFa');
+    const exampleDeBackEl = document.getElementById('exampleDeBack');
+    const counterEl = document.getElementById('counter');
+    const modeIndicator = document.getElementById('modeIndicator');
+    
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+    
+    function buildConjugationHTML(conj) {
+        if (!conj) return '<span style="color:#888;">Keine Konjugation (Nomen/Adjektiv)</span>';
+        return `
+            <span class="conjugation-pronoun">ich</span><span>${conj.ich || '-'}</span>
+            <span class="conjugation-pronoun">du</span><span>${conj.du || '-'}</span>
+            <span class="conjugation-pronoun">er/sie/es</span><span>${conj.er || '-'}</span>
+            <span class="conjugation-pronoun">wir</span><span>${conj.wir || '-'}</span>
+            <span class="conjugation-pronoun">ihr</span><span>${conj.ihr || '-'}</span>
+            <span class="conjugation-pronoun">Sie/sie</span><span>${conj.sie || '-'}</span>
+        `;
+    }
+    
+    function getCurrentCard() {
+        return isRandomMode ? shuffledCards[currentIndex] : originalOrder[currentIndex];
+    }
+    
+    function updateCardDisplay() {
+        const card = getCurrentCard();
+        if (!card) return;
+        
+        if (card.type === "Verb") {
+            typeBadge.textContent = "⚡ Verb";
+        } else if (card.type === "Adjektiv") {
+            typeBadge.textContent = "📌 Adjektiv";
+        } else if (card.type === "Verbphrase") {
+            typeBadge.textContent = "⚡ Verbphrase";
+        } else {
+            typeBadge.textContent = "📌 Nomen";
+        }
+        
+        germanWordEl.textContent = card.german;
+        
+        if (card.article && card.type !== "Verb" && card.type !== "Adjektiv") {
+            articlePluralEl.style.display = "inline-block";
+            articlePluralEl.textContent = `${card.article} • Plural: ${card.plural || '—'}`;
+        } else {
+            articlePluralEl.style.display = "none";
+        }
+        
+        exampleDeEl.textContent = card.exampleDe;
+        formsInfoEl.textContent = card.forms || "—";
+        conjugationGridEl.innerHTML = buildConjugationHTML(card.conjugation);
+        
+        persianWordEl.textContent = card.persian;
+        exampleFaEl.textContent = card.exampleFa;
+        exampleDeBackEl.textContent = card.exampleDe;
+        
+        counterEl.textContent = `${currentIndex+1} / ${isRandomMode ? shuffledCards.length : originalOrder.length}`;
+        modeIndicator.textContent = isRandomMode ? "🎲 Modus: Zufall" : "📋 Modus: Normal";
+        
+        cardEl.classList.remove('flipped');
+    }
+    
+    function nextCard() {
+        const max = isRandomMode ? shuffledCards.length : originalOrder.length;
+        currentIndex = (currentIndex + 1) % max;
+        updateCardDisplay();
+    }
+    
+    function prevCard() {
+        const max = isRandomMode ? shuffledCards.length : originalOrder.length;
+        currentIndex = (currentIndex - 1 + max) % max;
+        updateCardDisplay();
+    }
+    
+    function randomCard() {
+        const max = isRandomMode ? shuffledCards.length : originalOrder.length;
+        currentIndex = Math.floor(Math.random() * max);
+        updateCardDisplay();
+    }
+    
+    function toggleRandomMode() {
+        isRandomMode = !isRandomMode;
+        if (isRandomMode) {
+            shuffledCards = shuffleArray([...originalOrder]);
+            currentIndex = 0;
+        } else {
+            const currentGerman = getCurrentCard().german;
+            currentIndex = originalOrder.findIndex(c => c.german === currentGerman);
+            if (currentIndex === -1) currentIndex = 0;
+        }
+        updateCardDisplay();
+    }
+    
+    function flipCard() {
+        cardEl.classList.toggle('flipped');
+    }
+    
+    document.getElementById('nextBtn').addEventListener('click', nextCard);
+    document.getElementById('prevBtn').addEventListener('click', prevCard);
+    document.getElementById('randomBtn').addEventListener('click', randomCard);
+    document.getElementById('randomBtn').addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        toggleRandomMode();
+    });
+    cardEl.addEventListener('click', flipCard);
+    
+    updateCardDisplay();
+</script>
+</body>
+</html>
