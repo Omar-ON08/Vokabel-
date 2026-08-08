@@ -37,7 +37,7 @@
 
         .container {
             width: 100%;
-            max-width: 520px;
+            max-width: 540px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -62,7 +62,7 @@
         /* Card Flip Container */
         .card-container {
             width: 100%;
-            height: 540px;
+            height: 600px;
             perspective: 1000px;
             cursor: pointer;
         }
@@ -87,7 +87,7 @@
             height: 100%;
             backface-visibility: hidden;
             border-radius: 16px;
-            padding: 24px;
+            padding: 22px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -142,29 +142,54 @@
 
         /* Section 1: Wort */
         .word-section {
-            margin-top: 10px;
-            margin-bottom: 12px;
+            margin-top: 8px;
+            margin-bottom: 10px;
         }
 
         .word-title {
-            font-size: 1.7rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: #ffffff;
             margin-bottom: 2px;
         }
 
         .word-meta {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--gold-accent);
+        }
+
+        /* Simple Explanation Box */
+        .simple-explanation {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px dashed var(--gold-accent);
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            margin-bottom: 10px;
+            color: #efefef;
+        }
+
+        .simple-explanation strong {
+            color: var(--gold-accent);
+        }
+
+        .usage-tag {
+            display: inline-block;
+            background: #333;
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 4px;
         }
 
         /* Section 2: Beispielsätze */
         .sentence-section {
             background: rgba(255, 255, 255, 0.03);
             border-left: 3px solid var(--gold-accent);
-            padding: 10px 12px;
+            padding: 8px 10px;
             border-radius: 0 8px 8px 0;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .card-back .sentence-section {
@@ -174,10 +199,10 @@
         }
 
         .sentence-label {
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             color: var(--text-muted);
             text-transform: uppercase;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             display: block;
         }
 
@@ -188,11 +213,11 @@
         }
 
         .sentence-list li {
-            font-size: 0.9rem;
-            line-height: 1.4;
-            margin-bottom: 6px;
+            font-size: 0.85rem;
+            line-height: 1.35;
+            margin-bottom: 5px;
             position: relative;
-            padding-left: 14px;
+            padding-left: 12px;
         }
 
         .sentence-list li:last-child {
@@ -209,8 +234,8 @@
 
         .card-back .sentence-list li {
             padding-left: 0;
-            padding-right: 14px;
-            font-size: 1rem;
+            padding-right: 12px;
+            font-size: 0.95rem;
         }
 
         .card-back .sentence-list li::before {
@@ -224,15 +249,15 @@
         /* Section 3: Formen / Konjugation */
         .details-section {
             background: rgba(0, 0, 0, 0.25);
-            padding: 10px 12px;
+            padding: 8px 10px;
             border-radius: 8px;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             margin-top: 5px;
         }
 
         .details-header {
             color: var(--gold-accent);
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: bold;
             margin-bottom: 4px;
             text-transform: uppercase;
@@ -240,11 +265,11 @@
 
         /* Back Content Details */
         .persian-word {
-            font-size: 1.9rem;
+            font-size: 1.8rem;
             font-weight: bold;
             color: var(--persian-green);
-            margin-top: 8px;
-            margin-bottom: 8px;
+            margin-top: 6px;
+            margin-bottom: 6px;
             line-height: 1.2;
         }
 
@@ -252,7 +277,7 @@
             text-align: center;
             font-size: 0.75rem;
             color: var(--text-muted);
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         /* Controls Navigation */
@@ -295,10 +320,10 @@
 
         @media (max-height: 700px) {
             .card-container {
-                height: 460px;
+                height: 520px;
             }
             .word-title {
-                font-size: 1.4rem;
+                font-size: 1.3rem;
             }
         }
     </style>
@@ -323,6 +348,9 @@
                         <div class="word-title" id="frontWord">das Rätsel</div>
                         <div class="word-meta" id="frontMeta">Plural: die Rätsel</div>
                     </div>
+
+                    <!-- Einfache Erklärung & Nutzung -->
+                    <div class="simple-explanation" id="simpleExplanation"></div>
 
                     <!-- 2. Beispielsätze (3 Beispiele) -->
                     <div class="sentence-section">
@@ -362,7 +390,7 @@
 
     <div class="controls">
         <button class="btn" id="prevBtn">← Vorige</button>
-        <button class="btn btn-random" id="randomBtn" title="Klick: Zufällige Karte | Rechtsklick: Zufallsmodus umschalten">Zufall 🎲</button>
+        <button class="btn btn-random" id="randomBtn" title="Klick: Zufällige Karte">Zufall 🎲</button>
         <button class="btn" id="nextBtn">Nächste →</button>
     </div>
 </div>
@@ -373,6 +401,8 @@ const cardsData = [
         type: "Nomen",
         word: "das Rätsel",
         meta: "Plural: die Rätsel",
+        simple: "Eine schwere Frage oder etwas, das man nicht versteht.",
+        usage: "Nutzung: Täglich (Spiele, Nachrichten, Alltag)",
         sentences: [
             { de: "Dieses Rätsel ist sehr schwer zu lösen.", fa: "حل کردن این چیستان بسیار سخت است." },
             { de: "Er mag Rätsel in der Zeitung.", fa: "او چیستان‌های داخل روزنامه را دوست دارد." },
@@ -384,6 +414,8 @@ const cardsData = [
         type: "Nomen",
         word: "das Erstaunen",
         meta: "Plural: (ohne Plural)",
+        simple: "Große Überraschung, wenn etwas Unerwartetes passiert.",
+        usage: "Nutzung: Allgemein (wenn man überrascht ist)",
         sentences: [
             { de: "Zu meinem Erstaunen hat er die Prüfung bestanden.", fa: "در کمال تعجب من، او در امتحان قبول شد." },
             { de: "Sie sah ihn mit erstaunten Augen an.", fa: "او با چشمانی تعجب‌زده به وی نگاه کرد." },
@@ -395,6 +427,8 @@ const cardsData = [
         type: "Nomen",
         word: "die Wucht",
         meta: "Plural: die Wuchten",
+        simple: "Sehr große Kraft oder Stärke von etwas.",
+        usage: "Nutzung: Allgemein (z. B. bei Unfällen oder Sport)",
         sentences: [
             { de: "Der Ball traf ihn mit voller Wucht.", fa: "توپ با تمام قدرت به او برخورد کرد." },
             { de: "Die Wucht der Explosion war riesig.", fa: "شدت انفجار بسیار عظیم بود." },
@@ -406,17 +440,21 @@ const cardsData = [
         type: "Adjektiv",
         word: "versaut",
         meta: "Steigerung: versauter – am versautesten",
+        simple: "Kaputt gemacht, ruiniert oder sehr schmutzig.",
+        usage: "Nutzung: Umgangssprachlich im Alltag",
         sentences: [
             { de: "Das ganze Wochenende ist durch den Regen versaut.", fa: "کل آخر هفته با باران خراب شد." },
             { de: "Er hat die Prüfung leider total versaut.", fa: "متأسفانه او امتحان را کاملاً خراب کرد." },
             { de: "Meine Hose ist vollkommen versaut.", fa: "شلوار من کاملاً کثیف و خراب شده است." }
         ],
-        details: "Adjektiv (umgangssprachlich für ruiniert/verdorben)"
+        details: "Adjektiv (umgangssprachlich)"
     },
     {
         type: "Adjektiv",
         word: "verwirrt",
         meta: "Steigerung: verwirrter – am verwirrtesten",
+        simple: "Wenn man nicht klar denken kann oder etwas nicht versteht.",
+        usage: "Nutzung: Täglich (im Alltag und Beruf)",
         sentences: [
             { de: "Er sah nach der Frage völlig verwirrt aus.", fa: "او بعد از سوال کاملاً گیج به نظر می‌رسید." },
             { de: "Die vielen Straßenschilder verwirren mich.", fa: "تابلوهای زیاد خیابان مرا گیج می‌کنند." },
@@ -428,6 +466,8 @@ const cardsData = [
         type: "Nomen",
         word: "die Flucht",
         meta: "Plural: die Fluchten",
+        simple: "Das Weglaufen vor einer Gefahr.",
+        usage: "Nutzung: Nachrichten, Geschichten, Allgemein",
         sentences: [
             { de: "Ihnen gelang die Flucht aus dem Gefängnis.", fa: "آن‌ها موفق به فرار از زندان شدند." },
             { de: "Er ergriff sofort die Flucht.", fa: "او بلافاصله اقدام به فرار کرد." },
@@ -439,6 +479,8 @@ const cardsData = [
         type: "Adjektiv",
         word: "skeptisch",
         meta: "Steigerung: skeptischer – am skeptischsten",
+        simple: "Wenn man einer Sache nicht ganz glaubt oder Zweifel hat.",
+        usage: "Nutzung: Täglich (Meinungen, Diskussionen)",
         sentences: [
             { de: "Ich bin noch etwas skeptisch bezüglich des Plans.", fa: "من هنوز نسبت به طرح کمی بدبین هستم." },
             { de: "Sie blickte skeptisch auf das Angebot.", fa: "او با تردید به پیشنهاد نگاه کرد." },
@@ -450,6 +492,8 @@ const cardsData = [
         type: "Verb",
         word: "berücksichtigen",
         meta: "Stammformen: berücksichtigt – berücksichtigte – hat berücksichtigt",
+        simple: "Etwas beachten oder in eine Entscheidung einplanen.",
+        usage: "Nutzung: Beruf, Amt, Formell",
         sentences: [
             { de: "Wir müssen alle Faktoren genau berücksichtigen.", fa: "ما باید همه عوامل را دقیقاً در نظر بگیریم." },
             { de: "Bitte berücksichtigen Sie meine Wünsche.", fa: "لطفاً خواسته های مرا لحاظ کنید." },
@@ -461,6 +505,8 @@ const cardsData = [
         type: "Verb",
         word: "aufsaugen",
         meta: "Stammformen: saugt auf – saugte/sog auf – hat aufgesaugt/aufgesogen",
+        simple: "Flüssigkeit oder Wissen komplett aufnehmen.",
+        usage: "Nutzung: Haushalt oder beim Lernen",
         sentences: [
             { de: "Der Schwamm saugt das Wasser schnell auf.", fa: "اسفنج آب را به سرعت جذب می‌کند." },
             { de: "Er saugt neues Wissen wie ein Schwamm auf.", fa: "او دانش جدید را مثل اسفنج جذب می‌کند." },
@@ -477,12 +523,16 @@ const cardsData = [
             { de: "Der Zugbegleiter prüfte meine Berechtigung.", fa: "مأمور قطار مجوز مرا بررسی کرد." },
             { de: "Er hat die rechtliche Berechtigung dazu.", fa: "او صلاحیت قانونی برای آن را دارد." }
         ],
+        simple: "Das Recht oder die Erlaubnis, etwas zu tun.",
+        usage: "Nutzung: Amt, Computer, Offiziell",
         details: "Nomen • Feminin"
     },
     {
         type: "Verb",
         word: "verdecken",
         meta: "Stammformen: verdeckt – verdeckte – hat verdeckt",
+        simple: "Etwas so zumachen oder davorstehen, dass man es nicht sieht.",
+        usage: "Nutzung: Täglich im Alltag",
         sentences: [
             { de: "Die Wolken verdeckten die Sonne völlig.", fa: "ابرها خورشید را کاملاً پوشانده بودند." },
             { de: "Er verdeckte sein Gesicht mit den Händen.", fa: "او صورتش را با دست‌هایش پوشاند." },
@@ -494,6 +544,8 @@ const cardsData = [
         type: "Nomen",
         word: "das Gewürzregal",
         meta: "Plural: die Gewürzregale",
+        simple: "Ein kleines Regal in der Küche für Pfeffer, Salz usw.",
+        usage: "Nutzung: Alltag, Küche",
         sentences: [
             { de: "Der Pfeffer steht oben im Gewürzregal.", fa: "فلفل بالای قفسه ادویه قرار دارد." },
             { de: "Ich habe ein neues Gewürzregal gekauft.", fa: "من یک قفسه ادویه جدید خریدم." },
@@ -505,6 +557,8 @@ const cardsData = [
         type: "Nomen",
         word: "das Kinn",
         meta: "Plural: die Kinne",
+        simple: "Der unterste Teil des Gesichts unter dem Mund.",
+        usage: "Nutzung: Täglich (Körperteil)",
         sentences: [
             { de: "Er stützte sein Kinn auf die Hand.", fa: "او چانه‌اش را روی دستش تکیه داد." },
             { de: "Er hat eine kleine Narbe am Kinn.", fa: "او یک زخم کوچک روی چانه دارد." },
@@ -516,6 +570,8 @@ const cardsData = [
         type: "Verb",
         word: "befürchten",
         meta: "Stammformen: befürchtet – befürchtete – hat befürchtet",
+        simple: "Angst haben, dass etwas Schlechtes passieren wird.",
+        usage: "Nutzung: Täglich (Gefühle, Erwartungen)",
         sentences: [
             { de: "Ich befürchte, dass es heute noch regnet.", fa: "می‌ترسم که امروز باران ببارد." },
             { de: "Wir befürchten das Schlimmste.", fa: "ما بیم بدترین‌ها را داریم." },
@@ -527,6 +583,8 @@ const cardsData = [
         type: "Nomen",
         word: "das Gerücht",
         meta: "Plural: die Gerüchte",
+        simple: "Eine Information, von der man nicht weiß, ob sie wahr ist.",
+        usage: "Nutzung: Täglich (Klatsch, Nachrichten)",
         sentences: [
             { de: "Hast du von den neuen Gerüchten gehört?", fa: "آیا در مورد شایعات جدید شنیده‌ای؟" },
             { de: "Das ist nur ein unbegründetes Gerücht.", fa: "این فقط یک شایعه بی‌اساس است." },
@@ -538,6 +596,8 @@ const cardsData = [
         type: "Verb",
         word: "sich erkundigen",
         meta: "Stammformen: erkundigt sich – erkundigte sich – hat sich erkundigt",
+        simple: "Nach Informationen fragen oder etwas recherchieren.",
+        usage: "Nutzung: Täglich (Reisen, Service, Höflichkeit)",
         sentences: [
             { de: "Ich möchte mich nach den Preisen erkundigen.", fa: "می‌خواهم در مورد قیمت‌ها پرس‌وجو کنم." },
             { de: "Er erkundigte sich bei der Rezeption.", fa: "او از پذیرش اطلاعات کسب کرد." },
@@ -549,6 +609,8 @@ const cardsData = [
         type: "Verb",
         word: "darstellen",
         meta: "Stammformen: stellt dar – stellte dar – hat dargestellt",
+        simple: "Etwas zeigen, bedeuten oder sein.",
+        usage: "Nutzung: Beruf, Schule, Allgemein",
         sentences: [
             { de: "Das Projekt stellt eine Herausforderung dar.", fa: "این پروژه یک چالش محسوب می‌شود." },
             { de: "Das Bild stellt eine Landschaft dar.", fa: "تصویر یک چشم‌انداز را نشان می‌دهد." },
@@ -560,6 +622,8 @@ const cardsData = [
         type: "Nomen",
         word: "der Einwand",
         meta: "Plural: die Einwände",
+        simple: "Eine Meinung gegen eine Idee oder einen Vorschlag.",
+        usage: "Nutzung: Meetings, Diskussionen",
         sentences: [
             { de: "Gibt es noch Einwände gegen den Plan?", fa: "آیا هنوز اعتراضی به این طرح وجود دارد؟" },
             { de: "Er erhob einen berechtigten Einwand.", fa: "او یک اعتراض بجا مطرح کرد." },
@@ -571,6 +635,8 @@ const cardsData = [
         type: "Adjektiv",
         word: "sorgfältig",
         meta: "Steigerung: sorgfältiger – am sorgfältigsten",
+        simple: "Mit sehr viel Genauigkeit und Vorsicht gemacht.",
+        usage: "Nutzung: Arbeit, Schule, Alltag",
         sentences: [
             { de: "Bitte lies den Vertrag sehr sorgfältig durch.", fa: "لطفاً قرارداد را با دقت بسیار بخوانید." },
             { de: "Sie arbeitet immer sehr sorgfältig.", fa: "او همیشه بسیار با دقت کار می‌کند." },
@@ -582,6 +648,8 @@ const cardsData = [
         type: "Adjektiv",
         word: "künftig",
         meta: "Steigerung: (keine Steigerung)",
+        simple: "Was in der Zukunft kommt oder passiert.",
+        usage: "Nutzung: Beruf, Pläne, Nachrichten",
         sentences: [
             { de: "Künftig werden wir eng zusammenarbeiten.", fa: "در آینده ما از نزدیک همکاری خواهیم کرد." },
             { de: "Das betrifft alle künftigen Entscheidungen.", fa: "این شامل تمام تصمیمات آینده می‌شود." },
@@ -593,6 +661,8 @@ const cardsData = [
         type: "Adjektiv",
         word: "bewährt",
         meta: "Steigerung: bewährter – am bewährtesten",
+        simple: "Etwas, das schon oft gut funktioniert hat.",
+        usage: "Nutzung: Arbeit, Produkte, Allgemein",
         sentences: [
             { de: "Wir nutzen eine bewährte Methode.", fa: "ما از یک روش امتحان‌پس‌داده استفاده می‌کنیم." },
             { de: "Er ist ein bewährter Mitarbeiter.", fa: "او یک کارمند باسابقه و قابل اعتماد است." },
@@ -604,6 +674,8 @@ const cardsData = [
         type: "Adjektiv",
         word: "hervorragend",
         meta: "Steigerung: hervorragender – am hervorragendsten",
+        simple: "Sehr sehr gut / ausgezeichnet.",
+        usage: "Nutzung: Täglich (Lob, Qualität)",
         sentences: [
             { de: "Das war eine hervorragende Leistung!", fa: "این یک عملکرد فوق‌العاده بود!" },
             { de: "Das Essen im Restaurant schmeckte hervorragend.", fa: "غذای رستوران فوق‌العاده خوشمزه بود." },
@@ -615,6 +687,8 @@ const cardsData = [
         type: "Adjektiv",
         word: "überzeugend",
         meta: "Steigerung: überzeugender – am überzeugendsten",
+        simple: "So gut, dass andere daran glauben.",
+        usage: "Nutzung: Präsentationen, Verhandlungen",
         sentences: [
             { de: "Ihre Argumente waren sehr überzeugend.", fa: "استدلال‌های او بسیار متقاعدکننده بود." },
             { de: "Er spielte seine Rolle überzeugend.", fa: "او نقش خود را متقاعدکننده بازی کرد." },
@@ -626,6 +700,8 @@ const cardsData = [
         type: "Adjektiv",
         word: "präzise",
         meta: "Steigerung: präziser – am präzisesten",
+        simple: "Exakt und auf den Punkt genau.",
+        usage: "Nutzung: Arbeit, Technik, Alltag",
         sentences: [
             { de: "Er gab mir eine sehr präzise Antwort.", fa: "او پاسخ بسیار دقیقی به من داد." },
             { de: "Die Uhr misst die Zeit sehr präzise.", fa: "این ساعت زمان را بسیار دقیق اندازه‌گیری می‌کند." },
@@ -637,6 +713,8 @@ const cardsData = [
         type: "Adjektiv",
         word: "intuitiv",
         meta: "Steigerung: intuitiver – am intuitivsten",
+        simple: "Ohne langes Nachdenken aus dem Bauchgefühl heraus.",
+        usage: "Nutzung: Technik (Apps), Verhalten",
         sentences: [
             { de: "Die Software hat eine intuitive Benutzeroberfläche.", fa: "این نرم‌افزار یک رابط کاربری شهودی دارد." },
             { de: "Er handelte völlig intuitiv.", fa: "او کاملاً بر اساس شهود عمل کرد." },
@@ -648,6 +726,8 @@ const cardsData = [
         type: "Verb",
         word: "erfordern",
         meta: "Stammformen: erfordert – erforderte – hat erfordert",
+        simple: "Etwas nötig haben oder brauchen.",
+        usage: "Nutzung: Beruf, Anforderung, Allgemein",
         sentences: [
             { de: "Diese Aufgabe erfordert viel Konzentration.", fa: "این کار نیازمند تمرکز زیادی است." },
             { de: "Der Beruf erfordert viel Erfahrung.", fa: "این شغل نیاز به تجربه زیادی دارد." },
@@ -659,6 +739,8 @@ const cardsData = [
         type: "Nomen",
         word: "der Fleiß",
         meta: "Plural: (ohne Plural)",
+        simple: "Harz arbeiten und viele Anstrengung zeigen.",
+        usage: "Nutzung: Schule, Arbeit, Lob",
         sentences: [
             { de: "Durch seinen Fleiß hat er das Ziel erreicht.", fa: "او با پشتکار خود به هدف رسید." },
             { de: "Ihr Fleiß wurde belohnt.", fa: "تلاش و پشتکار او پاداش داده شد." },
@@ -670,6 +752,8 @@ const cardsData = [
         type: "Verb",
         word: "beabsichtigen",
         meta: "Stammformen: beabsichtigt – beabsichtigte – hat beabsichtigt",
+        simple: "Den Plan haben, etwas Bestimmtes zu tun.",
+        usage: "Nutzung: Formell, Beruf, Briefe",
         sentences: [
             { de: "Ich beabsichtige, nächstes Jahr umzuziehen.", fa: "من قصد دارم سال آینده اسباب‌کشی کنم." },
             { de: "Was beabsichtigen Sie mit diesem Schritt?", fa: "هدف شما از این اقدام چیست؟" },
@@ -681,6 +765,8 @@ const cardsData = [
         type: "Adjektiv",
         word: "dauerhaft",
         meta: "Steigerung: dauerhafter – am dauerhaftesten",
+        simple: "Für lange Zeit oder für immer bleibend.",
+        usage: "Nutzung: Täglich (Verträge, Lösungen)",
         sentences: [
             { de: "Wir suchen nach einer dauerhaften Lösung.", fa: "ما به دنبال یک راه حل دائمی هستیم." },
             { de: "Das führte zu einer dauerhaften Veränderung.", fa: "این منجر به یک تغییر ماندگار شد." },
@@ -692,6 +778,8 @@ const cardsData = [
         type: "Nomen",
         word: "der Wortschatz",
         meta: "Plural: die Wortschätze",
+        simple: "Alle Wörter, die eine Person kennt oder eine Sprache hat.",
+        usage: "Nutzung: Sprachen lernen, Schule",
         sentences: [
             { de: "Sie hat einen sehr großen Wortschatz.", fa: "او دایره واژگان بسیار گسترده‌ای دارد." },
             { de: "Man sollte seinen Wortschatz täglich erweitern.", fa: "انسان باید دایره واژگان خود را روزانه گسترش دهد." },
@@ -703,6 +791,8 @@ const cardsData = [
         type: "Verb",
         word: "eingliedern",
         meta: "Stammformen: gliedert ein – gliederte ein – hat eingegliedert",
+        simple: "Teil von einer Gruppe oder einem System werden.",
+        usage: "Nutzung: Job, Gesellschaft, Schule",
         sentences: [
             { de: "Neue Mitarbeiter müssen gut eingegliedert werden.", fa: "کارمندان جدید باید به خوبی ادغام شوند." },
             { de: "Er hat sich schnell in das Team eingegliedert.", fa: "او به سرعت خود را در تیم جا داد." },
@@ -714,6 +804,8 @@ const cardsData = [
         type: "Adjektiv",
         word: "kontinuierlich",
         meta: "Steigerung: kontinuierlicher – am kontinuierlichsten",
+        simple: "Ohne Pause, immer gleichmäßig weiter.",
+        usage: "Nutzung: Arbeit, Prozess, Lernen",
         sentences: [
             { de: "Man braucht kontinuierliches Lernen für Erfolg.", fa: "برای موفقیت به یادگیری مداوم نیاز است." },
             { de: "Die Preise steigen kontinuierlich an.", fa: "قیمت‌ها به طور پیوسته افزایش می‌یابند." },
@@ -725,6 +817,8 @@ const cardsData = [
         type: "Verb",
         word: "anstreben",
         meta: "Stammformen: strebt an – strebte an – hat angestrebt",
+        simple: "Ein Ziel erreichen wollen und dafür arbeiten.",
+        usage: "Nutzung: Karriere, Ziele, Zukunft",
         sentences: [
             { de: "Ich strebe eine höhere Position an.", fa: "من برای یک موقعیت بالاتر تلاش می‌کنم." },
             { de: "Wir streben eine friedliche Lösung an.", fa: "ما در پی دستیابی به یک راه حل مسالمت‌آمیز هستیم." },
@@ -736,6 +830,8 @@ const cardsData = [
         type: "Nomen",
         word: "die Hürde",
         meta: "Plural: die Hürden",
+        simple: "Ein Hindernis oder ein Problem, das man lösen muss.",
+        usage: "Nutzung: Sport oder Metapher für Schwerigkeiten im Leben",
         sentences: [
             { de: "Gemeinsam können wir alle Hürden überwinden.", fa: "ما همراه هم می‌توانیم بر همه موانع غلبه کنیم." },
             { de: "Die Sprachbarriere war eine große Hürde.", fa: "مانع زبانی یک چالش بزرگ بود." },
@@ -747,6 +843,8 @@ const cardsData = [
         type: "Nomen",
         word: "die Komplexität",
         meta: "Plural: (ohne Plural)",
+        simple: "Wie schwierig, vielschichtig oder kompliziert etwas ist.",
+        usage: "Nutzung: Beruf, Wissenschaft, Technik",
         sentences: [
             { de: "Die Komplexität der Software überraschte uns.", fa: "پیچیدگی نرم‌افزار ما را شگفت‌زده کرد." },
             { de: "Wir müssen die Komplexität reduzieren.", fa: "ما باید میزان پیچیدگی را کاهش دهیم." },
@@ -766,6 +864,7 @@ const counterEl = document.getElementById('counter');
 const typeBadge = document.getElementById('typeBadge');
 const frontWord = document.getElementById('frontWord');
 const frontMeta = document.getElementById('frontMeta');
+const simpleExplanation = document.getElementById('simpleExplanation');
 const frontSentences = document.getElementById('frontSentences');
 const frontDetails = document.getElementById('frontDetails');
 
@@ -775,6 +874,18 @@ const backSentences = document.getElementById('backSentences');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const randomBtn = document.getElementById('randomBtn');
+
+const faWordsMap = [
+    "چیستان / معما", "حیرت / شگفتی", "شدت / قدرت", "خراب شده / ضایع شده", 
+    "گیج / سردرگم", "فرار", "مردد / بدبین", "لحاظ کردن / در نظر گرفتن", 
+    "جذب کردن / مکیدن", "مجوز / دسترسی", "پوشانده شده / مخفی", "قفسه ادویه", 
+    "چانه", "می‌ترسم / بیم داشتن", "شایعه", "پرس‌وجو کردن", 
+    "نشان دادن / محسوب شدن", "ایراد / اعتراض", "دقیق / با دقت", "در آینده / آینده", 
+    "اثبات شده / امتحان‌پس‌داده", "عالی / فوق‌العاده", "متقاعدکننده", "دقیق", 
+    "شهودی", "نیازمند بودن", "پشتکار / تلاش", "قصد داشتن", 
+    "دائمی / ماندگار", "دایره واژگان", "ادغام کردن", "مداوم / پیوسته", 
+    "تلاش کردن برای", "مانع / چالش", "پیچیدگی"
+];
 
 function renderCard(index) {
     const data = cardsData[index];
@@ -787,6 +898,9 @@ function renderCard(index) {
         frontWord.textContent = data.word;
         frontMeta.innerHTML = data.meta;
 
+        // Simple Explanation box
+        simpleExplanation.innerHTML = `<strong>Bedeutung:</strong> ${data.simple}<br><span class="usage-tag">${data.usage}</span>`;
+
         // Render 3 front sentences
         frontSentences.innerHTML = data.sentences.map(s => `<li>${s.de}</li>`).join('');
 
@@ -798,24 +912,8 @@ function renderCard(index) {
             frontDetails.style.display = 'none';
         }
 
-        // Back content
-        backWord.textContent = data.word.includes('(') ? data.word : data.word; 
-        backWord.textContent = cardsData[index].sentences[0] ? cardsData[index].word : '';
-        // Set Persian word
-        const faWordsMap = [
-            "چیستان / معما", "حیرت / شگفتی", "شدت / قدرت", "خراب شده / ضایع شده", 
-            "گیج / سردرگم", "فرار", "مردد / بدبین", "لحاظ کردن / در نظر گرفتن", 
-            "جذب کردن / مکیدن", "مجوز / دسترسی", "پوشانده شده / مخفی", "قفسه ادویه", 
-            "چانه", "می‌ترسم / بیم داشتن", "شایعه", "پرس‌وجو کردن", 
-            "نشان دادن / محسوب شدن", "ایراد / اعتراض", "دقیق / با دقت", "در آینده / آینده", 
-            "اثبات شده / امتحان‌پس‌داده", "عالی / فوق‌العاده", "متقاعدکننده", "دقیق", 
-            "شهودی", "نیازمند بودن", "پشتکار / تلاش", "قصد داشتن", 
-            "دائمی / ماندگار", "دایره واژگان", "ادغام کردن", "مداوم / پیوسته", 
-            "تلاش کردن برای", "مانع / چالش", "پیچیدگی"
-        ];
+        // Set Persian word & sentences
         backWord.textContent = faWordsMap[index];
-
-        // Render 3 back sentences
         backSentences.innerHTML = data.sentences.map(s => `<li>${s.fa}</li>`).join('');
 
         counterEl.textContent = `Karte ${index + 1} von ${cardsData.length}`;
@@ -854,19 +952,6 @@ randomBtn.addEventListener('click', () => {
     } while (newIndex === currentIndex && cardsData.length > 1);
     currentIndex = newIndex;
     renderCard(currentIndex);
-});
-
-// Right click for toggling Random Mode
-randomBtn.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-    isRandomMode = !isRandomMode;
-    if (isRandomMode) {
-        randomBtn.classList.add('active');
-        randomBtn.textContent = 'Zufall 🎲 (AN)';
-    } else {
-        randomBtn.classList.remove('active');
-        randomBtn.textContent = 'Zufall 🎲';
-    }
 });
 
 // Key Navigation
