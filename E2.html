@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabeltrainer - Portion 2</title>
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --secondary-color: #64748b;
+            --secondary-hover: #475569;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: #0f172a;
+        }
+
+        .counter {
+            font-size: 0.95rem;
+            color: var(--secondary-color);
+            margin-bottom: 25px;
+            background-color: #e2e8f0;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* Flashcard Styling */
+        .flashcard-container {
+            perspective: 1000px;
+            width: 380px;
+            height: 240px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            background-color: var(--card-bg);
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card-front {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .card-back {
+            background-color: #f8fafc;
+            color: var(--text-color);
+            transform: rotateY(180deg);
+        }
+
+        .card-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--secondary-color);
+            margin-bottom: 12px;
+        }
+
+        .card-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+            margin-bottom: 25px;
+        }
+
+        /* Controls / Buttons */
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 18px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Vokabeltrainer - Portion 2</h1>
+    <div class="counter" id="cardCounter">Karte 1 von 36</div>
+
+    <div class="flashcard-container" onclick="flipCard()">
+        <div class="card" id="flashcard">
+            <!-- Vorderseite (Englisch) -->
+            <div class="card-face card-front">
+                <div class="card-label">Englisch (Vorderseite)</div>
+                <div class="card-text" id="frontText">to be responsible for sth</div>
+            </div>
+            <!-- Rückseite (Deutsch) -->
+            <div class="card-face card-back">
+                <div class="card-label">Deutsch (Rückseite)</div>
+                <div class="card-text" id="backText">für etw. zuständig / verantwortlich sein</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hint">Klicke auf die Karte oder 'Umdrehen' zum Wenden</div>
+
+    <div class="controls">
+        <button class="btn-secondary" onclick="prevCard()">← Zurück</button>
+        <button class="btn-primary" onclick="flipCard()">🔄 Umdrehen</button>
+        <button class="btn-primary" onclick="nextCard()">Weiter / Skip →</button>
+    </div>
+    <div class="controls">
+        <button class="btn-secondary" onclick="shuffleCards()">🔀 Mischen</button>
+    </div>
+
+    <script>
+        // Vokabelliste für Portion 2 (36 Vokabeln)
+        const vocabData = [
+            { front: "to be responsible for sth", back: "für etw. zuständig / verantwortlich sein" },
+            { front: "role", back: "Funktion" },
+            { front: "duty", back: "Aufgabe, Pflicht" },
+            { front: "conference call", back: "Telefonkonferenz" },
+            { front: "to require sth", back: "etw. erfordern, etw. verlangen" },
+            { front: "to publish sth", back: "etw. veröffentlichen" },
+            { front: "to be glad", back: "froh sein, sich freuen" },
+            { front: "to practise sth", back: "etw. üben, etw. praktizieren" },
+            { front: "to serve sth", back: "etw. servieren" },
+            { front: "tough", back: "hart" },
+            { front: "reception", back: "Empfang, Rezeption" },
+            { front: "to greet sb", back: "jdn. begrüßen" },
+            { front: "to manage sth", back: "etw. (Betrieb usw.) führen" },
+            { front: "current", back: "aktuell" },
+            { front: "once", back: "einmal" },
+            { front: "general", back: "allgemein" },
+            { front: "work experience", back: "Praktikum" },
+            { front: "to come across sth", back: "auf etw. stoßen" },
+            { front: "stepping stone", back: "(wichtiger) Schritt, Sprungbrett" },
+            { front: "industry", back: "Branche, Gewerbe" },
+            { front: "condition", back: "Bedingung" },
+            { front: "to lack sth", back: "etw. nicht haben" },
+            { front: "to bridge a gap", back: "eine Lücke schließen" },
+            { front: "hands-on", back: "praktisch, praxisnah" },
+            { front: "career path", back: "Berufsweg, Laufbahn" },
+            { front: "travel operator", back: "Reiseveranstalter" },
+            { front: "first-hand", back: "aus erster Hand, direkt" },
+            { front: "to market sth", back: "etw. vermarkten" },
+            { front: "to familiarize oneself with sth", back: "sich mit etw. vertraut machen" },
+            { front: "daily operations pl", back: "Tagesgeschäft" },
+            { front: "to put sth into practice", back: "etw. anwenden, etw. in die Tat/Praxis umsetzen" },
+            { front: "logistics", back: "Logistik" },
+            { front: "to adapt sth (to sth)", back: "etw. (an etw.) anpassen" },
+            { front: "to meet sth", back: "etw. (Anforderungen usw.) erfüllen" },
+            { front: "to pick sth up", back: "sich etw. aneignen" },
+            { front: "tool", back: "Werkzeug, Instrument, Programm" }
+        ];
+
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        const flashcard = document.getElementById('flashcard');
+        const frontText = document.getElementById('frontText');
+        const backText = document.getElementById('backText');
+        const cardCounter = document.getElementById('cardCounter');
+
+        function updateCardContent() {
+            frontText.textContent = vocabData[currentIndex].front;
+            backText.textContent = vocabData[currentIndex].back;
+            cardCounter.textContent = `Karte ${currentIndex + 1} von ${vocabData.length}`;
+        }
+
+        function flipCard() {
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                flashcard.classList.add('is-flipped');
+            } else {
+                flashcard.classList.remove('is-flipped');
+            }
+        }
+
+        function nextCard() {
+            if (isFlipped) {
+                flipCard();
+                setTimeout(() => {
+                    currentIndex = (currentIndex + 1) % vocabData.length;
+                    updateCardContent();
+                }, 300);
+            } else {
+                currentIndex = (currentIndex + 1) % vocabData.length;
+                updateCardContent();
+            }
+        }
+
+        function prevCard() {
+            if (isFlipped) {
+                flipCard();
+                setTimeout(() => {
+                    currentIndex = (currentIndex - 1 + vocabData.length) % vocabData.length;
+                    updateCardContent();
+                }, 300);
+            } else {
+                currentIndex = (currentIndex - 1 + vocabData.length) % vocabData.length;
+                updateCardContent();
+            }
+        }
+
+        function shuffleCards() {
+            if (isFlipped) {
+                flipCard();
+            }
+            setTimeout(() => {
+                for (let i = vocabData.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [vocabData[i], vocabData[j]] = [vocabData[j], vocabData[i]];
+                }
+                currentIndex = 0;
+                updateCardContent();
+            }, 300);
+        }
+
+        // Initiale Ansicht laden
+        updateCardContent();
+    </script>
+</body>
+</html>
