@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meine Links</title>
+  <title>Meine Linksammlung</title>
   <style>
     * {
       margin: 0;
@@ -12,23 +12,27 @@
     }
 
     body {
+      /* Schöner Farbverlauf im Hintergrund */
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       min-height: 100vh;
       padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
     }
 
-    /* Folien-Container */
-    .folie {
-      max-width: 1000px;
-      margin: 0 auto;
+    /* Hauptcontainer (die weiße Karte) */
+    .container {
+      max-width: 1100px;
+      width: 100%;
       background: white;
       border-radius: 2rem;
       padding: 2rem;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
     }
 
-    /* Kopf der Folie */
+    /* Kopfbereich */
     .kopf {
       text-align: center;
       margin-bottom: 2rem;
@@ -39,200 +43,284 @@
     .kopf h1 {
       font-size: 2rem;
       color: #333;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
     }
 
     .kopf p {
       color: #666;
+      font-size: 0.95rem;
     }
 
-    /* Jeder Link ist eine eigene Folie (Karte) */
-    .link-folie {
-      display: block;
-      background: #f8f9fa;
+    /* Das Grid für die zwei Sprachen */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* Zwei gleich große Spalten */
+      gap: 2rem; /* Abstand zwischen den Spalten */
+    }
+
+    /* Spaltenüberschriften */
+    .spalte h2 {
+      font-size: 1.2rem;
+      color: #555;
       margin-bottom: 1rem;
-      padding: 1rem 1.5rem;
+      padding-left: 0.5rem;
+      border-left: 4px solid #764ba2;
+    }
+
+    /* Die Link-Karten */
+    .link-folie {
+      display: flex;
+      align-items: center;
+      background: #f8f9fa;
+      margin-bottom: 0.8rem;
+      padding: 1rem 1.2rem;
       border-radius: 1rem;
       text-decoration: none;
       color: #333;
+      /* Blaue Balken auf beiden Seiten */
       border-left: 5px solid #667eea;
+      border-right: 5px solid #667eea;
       transition: all 0.3s ease;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 
     .link-folie:hover {
-      transform: translateX(8px);
+      transform: translateY(-3px) scale(1.02);
       background: #f0f2ff;
-      border-left: 8px solid #764ba2;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      border-left-color: #764ba2;
+      border-right-color: #764ba2;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
 
-    /* Links-Zeichen groß */
-    .link-folie .zeichen {
-      font-size: 1.8rem;
-      margin-right: 1rem;
-      display: inline-block;
-    }
-
-    .link-folie .info {
-      display: inline-block;
-      vertical-align: middle;
-    }
-
-    .link-folie .titel {
+    /* Die Nummer im Kreis */
+    .nummer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 32px;
+      height: 32px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
       font-weight: bold;
-      font-size: 1.2rem;
+      font-size: 0.9rem;
+      margin-right: 1rem;
+      flex-shrink: 0;
+      transition: background 0.3s;
     }
 
-    .link-folie .beschreibung {
-      font-size: 0.85rem;
-      color: #666;
+    .link-folie:hover .nummer {
+      background: #764ba2;
+    }
+
+    /* Textbereich */
+    .info {
+      flex: 1;
+    }
+
+    .titel {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #222;
+    }
+
+    .beschreibung {
+      font-size: 0.8rem;
+      color: #777;
       margin-top: 0.2rem;
     }
 
-    /* Footer */
-    .fuss {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.8rem;
-      color: #888;
-      padding-top: 1rem;
-      border-top: 1px solid #ddd;
+    /* Icon (Link-Symbol) rechts */
+    .zeichen {
+      font-size: 1.2rem;
+      margin-left: 1rem;
+      opacity: 0.5;
+      transition: opacity 0.3s;
     }
 
-    /* Anleitung für mich (wird auf der Seite angezeigt) */
-    .anleitung {
-      background: #e8eaff;
-      padding: 1rem;
-      border-radius: 1rem;
-      margin-bottom: 2rem;
-      font-size: 0.9rem;
+    .link-folie:hover .zeichen {
+      opacity: 1;
     }
 
-    .anleitung h3 {
-      color: #667eea;
-      margin-bottom: 0.5rem;
-    }
-
-    .anleitung code {
-      background: white;
-      padding: 0.2rem 0.5rem;
-      border-radius: 0.5rem;
-      font-family: monospace;
-    }
-
-    @media (max-width: 600px) {
-      .folie {
+    /* Responsive: Auf kleinen Bildschirmen untereinander */
+    @media (max-width: 700px) {
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .container {
         padding: 1.2rem;
       }
-      .link-folie .zeichen {
-        font-size: 1.3rem;
-        margin-right: 0.7rem;
-      }
-      .link-folie .titel {
-        font-size: 1rem;
+      .kopf h1 {
+        font-size: 1.5rem;
       }
     }
   </style>
 </head>
 <body>
 
-<div class="folie">
+<div class="container">
   <div class="kopf">
     <h1>🔗 Meine Linksammlung</h1>
+    <p>Deutsch &amp; Englisch – Folien 1 bis 9</p>
   </div>
 
-  <!-- ========================================================== -->
-  <!-- HIER KOMMEN DEINE LINKS REIN - GANZ EINFACH!              -->
-  <!-- ========================================================== -->
-  <!-- 
-    So fügst du einen Link hinzu:
-    
-    <a href="DEINE_URL" class="link-folie" target="_blank">
-      <span class="zeichen">🔗</span>
-      <div class="info">
-        <div class="titel">TITEL DES LINKS</div>
-        <div class="beschreibung">Kurze Beschreibung (optional)</div>
-      </div>
-    </a>
-    
-    Kopiere diese Zeile und ändere URL, Titel und Beschreibung.
-    So viele du willst!
-  -->
-  
-  <!-- Deine Links: Einfach die folgenden Zeilen bearbeiten oder neue dazu kopieren -->
-  
-  <a href="30-1.html" class="link-folie">
-    <span class="zeichen">🔗</span>
-    <div class="info">
-      <div class="titel">Folie 1</div>
+  <div class="grid">
+    <!-- LINKE SPALTE: DEUTSCH -->
+    <div class="spalte">
+      <h2>🇩🇪 Deutsch</h2>
+
+      <a href="30-1.html" class="link-folie" target="_blank">
+        <span class="nummer">1</span>
+        <div class="info">
+          <div class="titel">Folie 1</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-2.html" class="link-folie" target="_blank">
+        <span class="nummer">2</span>
+        <div class="info">
+          <div class="titel">Folie 2</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-3.html" class="link-folie" target="_blank">
+        <span class="nummer">3</span>
+        <div class="info">
+          <div class="titel">Folie 3</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-4.html" class="link-folie" target="_blank">
+        <span class="nummer">4</span>
+        <div class="info">
+          <div class="titel">Folie 4</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-5.html" class="link-folie" target="_blank">
+        <span class="nummer">5</span>
+        <div class="info">
+          <div class="titel">Folie 5</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-6.html" class="link-folie" target="_blank">
+        <span class="nummer">6</span>
+        <div class="info">
+          <div class="titel">Folie 6</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-7.html" class="link-folie" target="_blank">
+        <span class="nummer">7</span>
+        <div class="info">
+          <div class="titel">Folie 7</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-8.html" class="link-folie" target="_blank">
+        <span class="nummer">8</span>
+        <div class="info">
+          <div class="titel">Folie 8</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-9.html" class="link-folie" target="_blank">
+        <span class="nummer">9</span>
+        <div class="info">
+          <div class="titel">Folie 9</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
     </div>
-  </a>
 
-  <a href="30-2.html" class="link-folie">
-    <span class="zeichen">🔗</span>
-    <div class="info">
-      <div class="titel">Folie 2</div>
+    <!-- RECHTE SPALTE: ENGLISCH -->
+    <div class="spalte">
+      <h2>🇬🇧 English</h2>
+
+      <a href="30-1-en.html" class="link-folie" target="_blank">
+        <span class="nummer">1</span>
+        <div class="info">
+          <div class="titel">Slide 1</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-2-en.html" class="link-folie" target="_blank">
+        <span class="nummer">2</span>
+        <div class="info">
+          <div class="titel">Slide 2</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-3-en.html" class="link-folie" target="_blank">
+        <span class="nummer">3</span>
+        <div class="info">
+          <div class="titel">Slide 3</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-4-en.html" class="link-folie" target="_blank">
+        <span class="nummer">4</span>
+        <div class="info">
+          <div class="titel">Slide 4</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-5-en.html" class="link-folie" target="_blank">
+        <span class="nummer">5</span>
+        <div class="info">
+          <div class="titel">Slide 5</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-6-en.html" class="link-folie" target="_blank">
+        <span class="nummer">6</span>
+        <div class="info">
+          <div class="titel">Slide 6</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-7-en.html" class="link-folie" target="_blank">
+        <span class="nummer">7</span>
+        <div class="info">
+          <div class="titel">Slide 7</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-8-en.html" class="link-folie" target="_blank">
+        <span class="nummer">8</span>
+        <div class="info">
+          <div class="titel">Slide 8</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+
+      <a href="30-9-en.html" class="link-folie" target="_blank">
+        <span class="nummer">9</span>
+        <div class="info">
+          <div class="titel">Slide 9</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
     </div>
-  </a>
-
-  <a href="30-3.html" class="link-folie">
-    <span class="zeichen">🔗</span>
-    <div class="info">
-      <div class="titel">Folie 3</div>
-    </div>
-  </a>
-
-  <a href="30-4.html" class="link-folie">
-    <span class="zeichen">🔗</span>
-    <div class="info">
-      <div class="titel">Folie 4</div>
-    </div>
-  </a>
-
-  <a href="30-5.html" class="link-folie">
-    <span class="zeichen">🔗</span>
-    <div class="info">
-      <div class="titel">Folie 5</div>
-    </div>
-  </a>
-    <a href="30-6.html" class="link-folie">
-    <span class="zeichen">🔗</span>
-    <div class="info">
-      <div class="titel">Folie 6</div>
-    </div>
-  </a>
-     <a href="30-7.html" class="link-folie">
-    <span class="zeichen">🔗</span>
-    <div class="info">
-      <div class="titel">Folie 7</div>
-    </div>
-  </a>
-     <a href="30-8.html" class="link-folie">
-    <span class="zeichen">🔗</span>
-    <div class="info">
-      <div class="titel">Folie 8</div>
-    </div>
-  </a>
-   <a href="30-9.html" class="link-folie">
-    <span class="zeichen">🔗</span>
-    <div class="info">
-      <div class="titel">Folie 9</div>
-    </div>
-  </a>
-
-
-
-
-
-
-
-  <!-- ========================================================== -->
-  <!-- HIER ENDEN DEINE LINKS - DU KANNST WEITERE HINZUFÜGEN!    -->
-  <!-- ========================================================== -->
-
-  <!-- Kleine Anleitung für dich (wird mit angezeigt, damit du weißt wie's geht) -->
-
+  </div>
+</div>
 
 </body>
 </html>
