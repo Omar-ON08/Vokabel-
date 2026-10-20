@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabeltrainer - Portion 3</title>
+    <!-- Tailwind CSS CDN for modern utilities -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom 3D Card Flip CSS */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col items-center justify-center p-4 selection:bg-blue-500 selection:text-white">
+
+    <!-- Header Section -->
+    <header class="text-center mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">
+            Vokabeltrainer - Portion 3
+        </h1>
+        <div id="cardCounter" class="inline-block bg-slate-200 text-slate-600 text-sm font-semibold px-4 py-1 rounded-full shadow-inner">
+            Karte 1 von 36
+        </div>
+    </header>
+
+    <!-- Main Flashcard Area -->
+    <main class="w-full max-w-md flex flex-col items-center">
+        <!-- 3D Card Container -->
+        <div class="perspective-1000 w-full h-64 sm:h-72 cursor-pointer mb-4 group" onclick="flipCard()">
+            <div id="flashcard" class="relative w-full h-full transform-style-3d transition-transform duration-500 ease-in-out rounded-2xl shadow-xl bg-white border border-slate-200">
+                
+                <!-- Front Side (English) -->
+                <div class="absolute inset-0 w-full h-full backface-hidden rounded-2xl p-6 flex flex-col items-center justify-center text-center bg-white border border-slate-200 shadow-sm">
+                    <span class="text-xs font-semibold tracking-wider text-slate-400 uppercase mb-4">
+                        ENGLISCH (VORDERSEITE)
+                    </span>
+                    <p id="frontText" class="text-xl sm:text-2xl font-bold text-slate-900 leading-snug">
+                        to gain sth
+                    </p>
+                </div>
+
+                <!-- Back Side (German) -->
+                <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-2xl p-6 flex flex-col items-center justify-center text-center bg-slate-50 border border-slate-200 shadow-sm">
+                    <span class="text-xs font-semibold tracking-wider text-slate-400 uppercase mb-4">
+                        DEUTSCH (RÜCKSEITE)
+                    </span>
+                    <p id="backText" class="text-lg sm:text-xl font-semibold text-slate-800 leading-relaxed">
+                        etw. erwerben, etw. erlangen, etw. gewinnen
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Subtext Hint -->
+        <p class="text-xs sm:text-sm text-slate-500 mb-6 text-center">
+            Klicke auf die Karte oder 'Umdrehen' zum Wenden
+        </p>
+
+        <!-- Controls Group -->
+        <div class="w-full flex flex-col gap-3">
+            <!-- Row 1: Primary Controls -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                <button onclick="prevCard()" class="bg-slate-500 hover:bg-slate-600 active:scale-95 text-white font-medium py-2.5 px-3 rounded-xl transition duration-150 flex items-center justify-center text-sm sm:text-base shadow-sm">
+                    ← Zurück
+                </button>
+                <button onclick="flipCard()" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-medium py-2.5 px-3 rounded-xl transition duration-150 flex items-center justify-center text-sm sm:text-base shadow-sm">
+                    🔄 Umdrehen
+                </button>
+                <button onclick="nextCard()" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-medium py-2.5 px-3 rounded-xl transition duration-150 flex items-center justify-center text-sm sm:text-base shadow-sm">
+                    Weiter / Skip →
+                </button>
+            </div>
+
+            <!-- Row 2: Secondary Controls -->
+            <div class="flex justify-center">
+                <button onclick="shuffleCards()" class="w-full sm:w-2/3 bg-slate-500 hover:bg-slate-600 active:scale-95 text-white font-medium py-2.5 px-4 rounded-xl transition duration-150 flex items-center justify-center text-sm sm:text-base shadow-sm">
+                    🔀 Mischen
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Vocabulary dataset for Portion 3 (36 items)
+        const vocabData = [
+            { front: "to gain sth", back: "etw. erwerben, etw. erlangen, etw. gewinnen" },
+            { front: "to be honest", back: "ehrlich gesagt" },
+            { front: "transport company", back: "Beförderungsunternehmen" },
+            { front: "to guess", back: "glauben, vermuten" },
+            { front: "ability", back: "Fähigkeit" },
+            { front: "connection", back: "Verbindung, Kontakt" },
+            { front: "advice", back: "Hinweis(e), Tipp(s), Rat(schläge)" },
+            { front: "mentorship", back: "(persönliche) Betreuung, Förderung" },
+            { front: "job offer", back: "Stellenangebot" },
+            { front: "to hire sb", back: "jdn. einstellen" },
+            { front: "to stay in touch", back: "in Verbindung bleiben" },
+            { front: "to open up opportunities", back: "Chancen bieten, Möglichkeiten eröffnen" },
+            { front: "repetitive", back: "monoton, repetitiv" },
+            { front: "understanding", back: "Verständnis, Begriff" },
+            { front: "to obtain sth", back: "etw. erhalten, etw. bekommen" },
+            { front: "studies pl", back: "Studium" },
+            { front: "training", back: "Ausbildung" },
+            { front: "according to", back: "zufolge, laut, gemäß" },
+            { front: "headquarters pl", back: "Zentrale, Hauptsitz" },
+            { front: "sales report", back: "Umsatzbericht, Verkaufszahlen" },
+            { front: "to track sth", back: "etw. verfolgen" },
+            { front: "performance", back: "Leistung, (Leistungs-)Entwicklung" },
+            { front: "to identify sth", back: "etw. ermitteln, etw. bestimmen" },
+            { front: "campaign", back: "Kampagne, Aktion" },
+            { front: "promotional", back: "Werbe-" },
+            { front: "supplier", back: "Lieferant/in, Zulieferer" },
+            { front: "offer", back: "Angebot" },
+            { front: "to support sth", back: "etw. (Argument usw.) untermauern" },
+            { front: "buying decision", back: "Kaufentscheidung" },
+            { front: "follow-up", back: "Nachbereitung, Folge-" },
+            { front: "to gather sth", back: "etw. sammeln, etw. zusammentragen" },
+            { front: "ongoing", back: "laufend" },
+            { front: "occasionally", back: "gelegentlich" },
+            { front: "store layout", back: "Ladengestaltung, Flächenkonzept" },
+            { front: "pricing strategy", back: "Preisstrategie, Preispolitik" },
+            { front: "(job) application", back: "Bewerbung" }
+        ];
+
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        // DOM elements
+        const flashcard = document.getElementById('flashcard');
+        const frontText = document.getElementById('frontText');
+        const backText = document.getElementById('backText');
+        const cardCounter = document.getElementById('cardCounter');
+
+        // Render current vocabulary item
+        function updateCardContent() {
+            frontText.textContent = vocabData[currentIndex].front;
+            backText.textContent = vocabData[currentIndex].back;
+            cardCounter.textContent = `Karte ${currentIndex + 1} von ${vocabData.length}`;
+        }
+
+        // Flip card 3D animation handler
+        function flipCard() {
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                flashcard.classList.add('rotate-y-180');
+            } else {
+                flashcard.classList.remove('rotate-y-180');
+            }
+        }
+
+        // Navigate to next card
+        function nextCard() {
+            if (isFlipped) {
+                flipCard();
+                setTimeout(() => {
+                    currentIndex = (currentIndex + 1) % vocabData.length;
+                    updateCardContent();
+                }, 250);
+            } else {
+                currentIndex = (currentIndex + 1) % vocabData.length;
+                updateCardContent();
+            }
+        }
+
+        // Navigate to previous card
+        function prevCard() {
+            if (isFlipped) {
+                flipCard();
+                setTimeout(() => {
+                    currentIndex = (currentIndex - 1 + vocabData.length) % vocabData.length;
+                    updateCardContent();
+                }, 250);
+            } else {
+                currentIndex = (currentIndex - 1 + vocabData.length) % vocabData.length;
+                updateCardContent();
+            }
+        }
+
+        // Shuffle deck randomly using Fisher-Yates algorithm
+        function shuffleCards() {
+            if (isFlipped) {
+                flipCard();
+            }
+            setTimeout(() => {
+                for (let i = vocabData.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [vocabData[i], vocabData[j]] = [vocabData[j], vocabData[i]];
+                }
+                currentIndex = 0;
+                updateCardContent();
+            }, 250);
+        }
+
+        // Keyboard Shortcut Support for better study UX
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Space' || e.code === 'Space') {
+                e.preventDefault();
+                flipCard();
+            } else if (e.key === 'ArrowRight') {
+                nextCard();
+            } else if (e.key === 'ArrowLeft') {
+                prevCard();
+            }
+        });
+
+        // Initialize first card on load
+        window.onload = function() {
+            updateCardContent();
+        };
+    </script>
+</body>
+</html>
