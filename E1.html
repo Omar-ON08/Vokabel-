@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vokabel-Lernkarten (Portion 1)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+      background: white;
+      border-radius: 2rem;
+      padding: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 1.8rem;
+      text-align: center;
+    }
+
+    /* Kartennummer Anzeige */
+    .card-number {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #667eea;
+      background: #e8eaff;
+      padding: 8px 18px;
+      border-radius: 20px;
+    }
+
+    /* Lernkarte Container (Zweispaltig) */
+    .card {
+      width: 100%;
+      min-height: 220px;
+      display: flex;
+      border-radius: 1.2rem;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      border: 2px solid #e2e8f0;
+      background-color: #f8f9fa;
+    }
+
+    /* Linker Bereich (Deutsch) */
+    .card-side {
+      flex: 1;
+      padding: 25px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      transition: background-color 0.3s;
+    }
+
+    .card-left {
+      background-color: #ffffff;
+      border-right: 2px dashed #cbd5e0;
+    }
+
+    /* Rechter Bereich (Englisch) */
+    .card-right {
+      background-color: #f0f4ff;
+    }
+
+    .label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-bottom: 15px;
+      color: #718096;
+    }
+
+    .vocab-text {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #2d3748;
+      line-height: 1.4;
+    }
+
+    /* Abdeckung für den Such-Effekt / Verdecken */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #764ba2;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      border-radius: 0;
+    }
+
+    /* Wenn verdeckt, wird das Overlay sichtbar */
+    .card-side.hidden .overlay {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Steuerung & Buttons */
+    .controls {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background-color: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .btn:hover {
+      background-color: #5a67d8;
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background-color: #718096;
+    }
+
+    .btn-secondary:hover {
+      background-color: #4a5568;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: #718096;
+      text-align: center;
+    }
+
+    @media (max-width: 500px) {
+      .card {
+        flex-direction: column;
+      }
+      .card-left {
+        border-right: none;
+        border-bottom: 2px dashed #cbd5e0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>📚 Vokabel-Lernkarten</h1>
+
+    <!-- Nummer unter/über der Karte -->
+    <div class="card-number" id="cardNumber">Karte 1 von 36</div>
+
+    <!-- Lernkarte mit links DEUTSCH und rechts ENGLISCH -->
+    <div class="card">
+      <!-- Links: Deutsch -->
+      <div class="card-side card-left" id="leftSide">
+        <div class="label">🇩🇪 Deutsch (Links)</div>
+        <div class="vocab-text" id="deText">eine Wohnung</div>
+        <div class="overlay" onclick="toggleHide('left')">❓ Klicken zum Aufdecken</div>
+      </div>
+
+      <!-- Rechts: Englisch -->
+      <div class="card-side card-right" id="rightSide">
+        <div class="label">🇬🇧 Englisch (Rechts)</div>
+        <div class="vocab-text" id="enText">a flat</div>
+        <div class="overlay" onclick="toggleHide('right')">❓ Klicken zum Aufdecken</div>
+      </div>
+    </div>
+
+    <!-- Hilfetext -->
+    <div class="hint">Tipp: Pfeiltasten (← / →) zum Blättern | Leertaste zum Aufdecken/Verdecken</div>
+
+    <!-- Control Buttons -->
+    <div class="controls">
+      <button class="btn btn-secondary" id="prevBtn">← Zurück</button>
+      <button class="btn" id="toggleBtn">👁️ Englisch Verdecken/Zeigen</button>
+      <button class="btn" id="nextBtn">Weiter / Skip →</button>
+      <button class="btn btn-secondary" id="shuffleBtn">🔀 Mischen</button>
+    </div>
+  </div>
+
+  <script>
+    // Vokabel-Liste aus Portion 1
+    const vocabList = [
+      { de: "eine Wohnung", en: "a flat" },
+      { de: "Teilzeitjob / Vollzeitjob", en: "part-time job / full-time job" },
+      { de: "angestellt sein", en: "to be employed" },
+      { de: "selbstständig sein", en: "to be self-employed" },
+      { de: "Hauptberuf / Haupttätigkeit", en: "main occupation" },
+      { de: "eine Firma gründen", en: "to set up a company" },
+      { de: "eine Firma leiten / führen", en: "to run a company" },
+      { de: "in ein Unternehmen einsteigen / einer Firma beitreten", en: "to join a business" },
+      { de: "Verwaltungsarbeit leisten / administrative Arbeit erledigen", en: "to do administrative work" },
+      { de: "eine Lieferung / Zustellung", en: "a delivery" },
+      { de: "jmdm. etw. liefern / zustellen", en: "to deliver sth to sb" },
+      { de: "ein Vorrat / eine Lieferung / ein Bedarf", en: "a supply" },
+      { de: "jmdn. mit etw. versorgen / jmdm. etw. liefern", en: "to supply sb with sth" },
+      { de: "selten", en: "rare (adj.)" },
+      { de: "eng / knapp", en: "tight (adj.)" },
+      { de: "Termin", en: "appointment" },
+      { de: "Einzelhandel", en: "retail" },
+      { de: "stellvertretende/r Filialleiter/in, Einzelhandelskaufmann/-frau", en: "retail assistant manager" },
+      { de: "Personalabteilung, Personalwesen", en: "HR (human resources)" },
+      { de: "Personalsachbearbeiter/in", en: "HR assistant" },
+      { de: "Kundenberater/in", en: "customer adviser" },
+      { de: "etw. bestellen", en: "to order sth" },
+      { de: "etw. (im Internet / per Aushang) bekanntgeben", en: "to post sth" },
+      { de: "jdn. bedienen", en: "to serve sb" },
+      { de: "einen Anruf weiterleiten / durchstellen", en: "to transfer a call" },
+      { de: "Kollege/-in", en: "colleague" },
+      { de: "administrativ, Verwaltung", en: "administrative" },
+      { de: "freie / offene Stelle", en: "job opening" },
+      { de: "Büromaterial, Bürobedarf", en: "office supplies pl" },
+      { de: "etw. (Ware usw.) präsentieren, etw. auslegen", en: "to display sth" },
+      { de: "reibungslos, glatt", en: "smooth(ly)" },
+      { de: "Aufgabe, Zuständigkeit", en: "responsibility" },
+      { de: "Bewerber/in", en: "applicant" },
+      { de: "Stand des Bewerbungsverfahrens", en: "hiring status" },
+      { de: "Stellenanzeige", en: "job advert(isement)" },
+      { de: "Bewerber/in", en: "candidate" }
+    ];
+
+    let currentIndex = 0;
+    let cards = [...vocabList];
+
+    // DOM Elemente
+    const deText = document.getElementById('deText');
+    const enText = document.getElementById('enText');
+    const cardNumber = document.getElementById('cardNumber');
+    const rightSide = document.getElementById('rightSide');
+    const leftSide = document.getElementById('leftSide');
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const toggleBtn = document.getElementById('toggleBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+
+    // Karte aktualisieren
+    function updateCard() {
+      deText.textContent = cards[currentIndex].de;
+      enText.textContent = cards[currentIndex].en;
+      cardNumber.textContent = `Karte ${currentIndex + 1} von ${cards.length}`;
+    }
+
+    // Nächste Karte (Skip)
+    function nextCard() {
+      currentIndex = (currentIndex + 1) % cards.length;
+      updateCard();
+    }
+
+    // Vorherige Karte
+    function prevCard() {
+      currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+      updateCard();
+    }
+
+    // Rechtes Feld (Englisch) abdecken / einblenden
+    function toggleEnglish() {
+      rightSide.classList.toggle('hidden');
+    }
+
+    function toggleHide(side) {
+      if(side === 'left') leftSide.classList.toggle('hidden');
+      if(side === 'right') rightSide.classList.toggle('hidden');
+    }
+
+    // Mischen
+    function shuffleCards() {
+      for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+      }
+      currentIndex = 0;
+      updateCard();
+    }
+
+    // Event Listener
+    nextBtn.addEventListener('click', nextCard);
+    prevBtn.addEventListener('click', prevCard);
+    toggleBtn.addEventListener('click', toggleEnglish);
+    shuffleBtn.addEventListener('click', shuffleCards);
+
+    // Tastatur-Steuerung
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        toggleEnglish();
+      } else if (e.code === 'ArrowRight') {
+        nextCard();
+      } else if (e.code === 'ArrowLeft') {
+        prevCard();
+      }
+    });
+
+    // Start
+    updateCard();
+  </script>
+
+</body>
+</html>
