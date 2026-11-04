@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabeltrainer - Portion 1</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f9;
+        }
+        /* 3D Flip Card Container */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between py-10 px-4 text-slate-800">
+
+    <!-- Header Section -->
+    <header class="text-center mt-4">
+        <h1 class="text-2xl sm:text-3xl font-bold text-slate-700 tracking-tight">
+            Vokabeltrainer - Portion 1
+        </h1>
+        <div id="counter-badge" class="inline-block mt-3 px-4 py-1.5 bg-slate-200/70 text-slate-600 rounded-full text-sm font-medium shadow-sm">
+            Karte 1 von 36
+        </div>
+    </header>
+
+    <!-- Main Flashcard Area -->
+    <main class="w-full max-w-xl my-6 flex flex-col items-center">
+        <div class="perspective-1000 w-full h-72 sm:h-80 cursor-pointer" onclick="flipCard()">
+            <div id="flashcard" class="relative w-full h-full rounded-2xl shadow-xl transform-style-3d bg-white">
+                
+                <!-- Vorderseite (Englisch) -->
+                <div class="absolute inset-0 w-full h-full bg-white rounded-2xl p-8 flex flex-col items-center justify-center backface-hidden border border-slate-100">
+                    <span id="front-label" class="text-xs sm:text-sm uppercase tracking-wider text-slate-400 font-semibold mb-3">
+                        Englisch (Vorderseite)
+                    </span>
+                    <h2 id="front-text" class="text-3xl sm:text-4xl font-extrabold text-slate-900 text-center">
+                        a flat
+                    </h2>
+                </div>
+
+                <!-- Rückseite (Deutsch) -->
+                <div class="absolute inset-0 w-full h-full bg-slate-900 text-white rounded-2xl p-8 flex flex-col items-center justify-center backface-hidden rotate-y-180 shadow-inner">
+                    <span id="back-label" class="text-xs sm:text-sm uppercase tracking-wider text-slate-400 font-semibold mb-3">
+                        Deutsch (Rückseite)
+                    </span>
+                    <h2 id="back-text" class="text-3xl sm:text-4xl font-extrabold text-white text-center">
+                        eine Wohnung
+                    </h2>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Hint instruction -->
+        <p class="text-xs sm:text-sm text-slate-500 mt-4 text-center">
+            Klicke auf die Karte oder 'Umdrehen' zum Wenden
+        </p>
+    </main>
+
+    <!-- Control Buttons Footer -->
+    <footer class="w-full max-w-xl flex flex-col items-center gap-3 mb-6">
+        <!-- Main Actions Row -->
+        <div class="flex flex-wrap items-center justify-center gap-3 w-full">
+            <button onclick="prevCard()" class="flex-1 min-w-[110px] bg-slate-600 hover:bg-slate-700 text-white font-medium py-3 px-4 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 active:scale-95">
+                <i class="fa-solid fa-arrow-left"></i> Zurück
+            </button>
+            <button onclick="flipCard()" class="flex-1 min-w-[130px] bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 active:scale-95">
+                <i class="fa-solid fa-rotate"></i> Umdrehen
+            </button>
+            <button onclick="nextCard()" class="flex-1 min-w-[130px] bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 active:scale-95">
+                Weiter / Skip <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- Shuffle Action Row -->
+        <div class="w-full flex justify-center mt-1">
+            <button onclick="shuffleCards()" class="w-full sm:w-auto px-8 bg-slate-600 hover:bg-slate-700 text-white font-medium py-3 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center gap-2 active:scale-95">
+                <i class="fa-solid fa-shuffle"></i> Mischen
+            </button>
+        </div>
+    </footer>
+
+    <!-- JavaScript logic -->
+    <script>
+        // Array mit genau 36 Vokabeln (basierend auf den bereitgestellten Vokabeln und ergänzt)
+        const vocabData = [
+            { english: "Interference", german: "Interferenz / Störung" },
+            { english: "Office supplies", german: "Bürobedarf" },
+            { english: "Status of the application process", german: "Stand des Bewerbungsverfahrens" },
+            { english: "Primarily", german: "Primär / Hauptsächlich" },
+            { english: "Avoid", german: "Vermeiden" },
+            { english: "Guild", german: "Gilde / Zunft" },
+            { english: "Discourage", german: "Entmutigen / Abraten" },
+            { english: "Roughest", german: "Der/die/das raueste / Ungefährste" },
+            { english: "Eager", german: "Eifrig / Begierig" },
+            { english: "Nuts", german: "Nüsse / Verrückt" },
+            { english: "Environment", german: "Umwelt / Umgebung" },
+            { english: "Cause", german: "Ursache / Verursachen" },
+            { english: "Legacy", german: "Vermächtnis / Altsystem (IT)" },
+            { english: "Hustling", german: "Sich anstrengen / Geschäftemachen" },
+            { english: "Certainly", german: "Sicherlich / Gewiss" },
+            { english: "Occasionally", german: "Gelegentlich" },
+            { english: "Economic sectors", german: "Wirtschaftssektoren" },
+            { english: "Separate", german: "Separat / Getrennt" },
+            { english: "Infrastructure", german: "Infrastruktur" },
+            { english: "Wheat", german: "Weizen" },
+            { english: "Primary production", german: "Urerzeugung" },
+            { english: "Harvests", german: "Erntet" },
+            { english: "Waste collection / Garbage collection", german: "Müllabfuhr" },
+            { english: "Mediator / Intermediary", german: "Vermittler" },
+            { english: "Vocational", german: "Beruflich / Berufsbildend" },
+            { english: "Development", german: "Entwicklung" },
+            { english: "Improvement", german: "Verbesserung" },
+            { english: "Challenge", german: "Herausforderung" },
+            { english: "Solution", german: "Lösung" },
+            { english: "Experience", german: "Erfahrung" },
+            { english: "Knowledge", german: "Wissen" },
+            { english: "Opportunity", german: "Gelegenheit" },
+            { english: "Success", german: "Erfolg" },
+            { english: "Goal", german: "Ziel" },
+            { english: "Decision", german: "Entscheidung" },
+            { english: "Future", german: "Zukunft" }
+        ];
+
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        const flashcard = document.getElementById("flashcard");
+        const frontText = document.getElementById("front-text");
+        const backText = document.getElementById("back-text");
+        const counterBadge = document.getElementById("counter-badge");
+
+        // Karte aktualisieren und anzeigen
+        function updateCard() {
+            const current = vocabData[currentIndex];
+            frontText.textContent = current.english;
+            backText.textContent = current.german;
+            counterBadge.textContent = `Karte ${currentIndex + 1} von ${vocabData.length}`;
+            
+            // Zurücksetzen auf Vorderseite beim Wechsel
+            if (isFlipped) {
+                flashcard.classList.remove("rotate-y-180");
+                isFlipped = false;
+            }
+        }
+
+        // Karte umdrehen
+        function flipCard() {
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                flashcard.classList.add("rotate-y-180");
+            } else {
+                flashcard.classList.remove("rotate-y-180");
+            }
+        }
+
+        // Nächste Karte (mit Schleife am Ende)
+        function nextCard() {
+            currentIndex = (currentIndex + 1) % vocabData.length;
+            updateCard();
+        }
+
+        // Vorherige Karte
+        function prevCard() {
+            currentIndex = (currentIndex - 1 + vocabData.length) % vocabData.length;
+            updateCard();
+        }
+
+        // Vokabeln mischen (Fisher-Yates Shuffle Algorithmus)
+        function shuffleCards() {
+            for (let i = vocabData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [vocabData[i], vocabData[j]] = [vocabData[j], vocabData[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        }
+
+        // Initialisierung beim Start
+        window.onload = function() {
+            updateCard();
+        };
+    </script>
+</body>
+</html>
