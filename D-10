@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabeltrainer - Deutsch / Persisch</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--text-main);
+            margin-bottom: 5px;
+        }
+
+        .progress-badge {
+            background-color: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        /* Card Flip Container */
+        .card-container {
+            width: 100%;
+            height: 420px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            direction: rtl;
+            text-align: right;
+        }
+
+        .lang-label {
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .word-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .main-word {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .audio-btn {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            color: var(--primary-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .audio-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .examples-section {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .example-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: #334155;
+        }
+
+        .example-item .audio-btn {
+            width: 26px;
+            height: 26px;
+            font-size: 0.75rem;
+            margin-top: 2px;
+        }
+
+        .card-hint {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #64748b;
+        }
+        .btn-secondary:hover { background-color: #475569; }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+        }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+
+        .btn-shuffle {
+            background-color: #4f46e5;
+            flex-basis: 100%;
+        }
+        .btn-shuffle:hover { background-color: #4338ca; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Vokabeltrainer</h1>
+        <div class="progress-badge" id="progress">Karte 1 von 29</div>
+    </header>
+
+    <div class="card-container" id="cardContainer">
+        <div class="card" id="card">
+            <!-- Vorderseite (Deutsch) -->
+            <div class="card-face card-front">
+                <div class="lang-label">DEUTSCH (VORDERSEITE)</div>
+                <div class="word-section">
+                    <div class="main-word" id="deWord">-</div>
+                    <button class="audio-btn" onclick="speakText(event, 'deWord', 'de-DE')">
+                        <i class="fas fa-volume-high"></i>
+                    </button>
+                </div>
+                <div class="examples-section">
+                    <div class="example-item">
+                        <button class="audio-btn" onclick="speakText(event, 'deEx1', 'de-DE')">
+                            <i class="fas fa-volume-high"></i>
+                        </button>
+                        <span id="deEx1">-</span>
+                    </div>
+                    <div class="example-item">
+                        <button class="audio-btn" onclick="speakText(event, 'deEx2', 'de-DE')">
+                            <i class="fas fa-volume-high"></i>
+                        </button>
+                        <span id="deEx2">-</span>
+                    </div>
+                </div>
+                <div class="card-hint">Klicke auf die Karte zum Umdrehen 🔄</div>
+            </div>
+
+            <!-- Rückseite (Persisch) -->
+            <div class="card-face card-back">
+                <div class="lang-label">فارسی (پشت کارت)</div>
+                <div class="word-section">
+                    <div class="main-word" id="faWord">-</div>
+                    <button class="audio-btn" onclick="speakText(event, 'faWord', 'fa-IR')">
+                        <i class="fas fa-volume-high"></i>
+                    </button>
+                </div>
+                <div class="examples-section">
+                    <div class="example-item">
+                        <button class="audio-btn" onclick="speakText(event, 'faEx1', 'fa-IR')">
+                            <i class="fas fa-volume-high"></i>
+                        </button>
+                        <span id="faEx1">-</span>
+                    </div>
+                    <div class="example-item">
+                        <button class="audio-btn" onclick="speakText(event, 'faEx2', 'fa-IR')">
+                            <i class="fas fa-volume-high"></i>
+                        </button>
+                        <span id="faEx2">-</span>
+                    </div>
+                </div>
+                <div class="card-hint">برای چرخاندن کارت کلیک کنید 🔄</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-secondary" onclick="prevCard()">
+            <i class="fas fa-arrow-left"></i> Zurück
+        </button>
+        <button class="btn btn-primary" onclick="flipCard()">
+            <i class="fas fa-rotate"></i> Umdrehen
+        </button>
+        <button class="btn btn-primary" onclick="nextCard()">
+            Weiter <i class="fas fa-arrow-right"></i>
+        </button>
+        <button class="btn btn-shuffle" onclick="shuffleCards()">
+            <i class="fas fa-shuffle"></i> Mischen
+        </button>
+    </div>
+</div>
+
+<script>
+    const vocabData = [
+        {
+            de: "Interferenz",
+            fa: "تداخل",
+            deEx1: "Die technischen Geräte verursachen eine akustische Interferenz.",
+            faEx1: "دستگاه‌های فنی باعث ایجاد تداخل صوتی می‌شوند.",
+            deEx2: "Lichtwellen zeigen im Experiment eine sichtbare Interferenz.",
+            faEx2: "امواج نور در آزمایش تداخل قابل‌مشاهده‌ای را نشان می‌دهند."
+        },
+        {
+            de: "der Bürobedarf",
+            fa: "لوازم‌التحریر اداری / ملزومات اداری",
+            deEx1: "Wir müssen dringend neuen Bürobedarf wie Stifte und Papier bestellen.",
+            faEx1: "ما باید فوراً لوازم‌التحریر اداری جدید مانند خودکار و کاغذ سفارش دهیم.",
+            deEx2: "Der Schrank für den Bürobedarf ist im Flur links.",
+            faEx2: "کمد لوازم اداری در راهرو سمت چپ است."
+        },
+        {
+            de: "der Stand des Bewerbungsverfahrens",
+            fa: "وضعیت فرایند درخواست شغلی",
+            deEx1: "Ich möchte mich nach dem aktuellen Stand des Bewerbungsverfahrens erkundigen.",
+            faEx1: "من می‌خواهم درباره وضعیت فعلی فرایند درخواست شغلی پرس‌و‌جو کنم.",
+            deEx2: "Der Stand des Bewerbungsverfahrens wird Ihnen per E-Mail mitgeteilt.",
+            faEx2: "وضعیت فرایند درخواست شغلی از طریق ایمیل به شما اطلاع داده خواهد شد."
+        },
+        {
+            de: "gelegentlich",
+            fa: "گاهی اوقات / گهگاه",
+            deEx1: "Wir trinken morgens gelegentlich zusammen einen Kaffee.",
+            faEx1: "ما گاهی اوقات صبح‌ها با هم قهوه می‌نوشیم.",
+            deEx2: "Gelegentlich macht es Spaß, einfach spazieren zu gehen.",
+            faEx2: "گاهی اوقات پیاده‌روی کردن لذت‌بخش است."
+        },
+        {
+            de: "der Wirtschaftssektor",
+            fa: "بخش اقتصادی",
+            deEx1: "Der Dienstleistungssektor ist ein wichtiger Wirtschaftssektor in diesem Land.",
+            faEx1: "بخش خدمات یک بخش اقتصادی مهم در این کشور است.",
+            deEx2: "In diesem Wirtschaftssektor gibt es derzeit viele Arbeitsplätze.",
+            faEx2: "در این بخش اقتصادی در حال حاضر مشاغل زیادی وجود دارد."
+        },
+        {
+            de: "separat",
+            fa: "جداگانه / مجزا",
+            deEx1: "Die Rechnung für das Essen und die Getränke kommt separat.",
+            faEx1: "صورت‌حساب غذا و نوشیدنی‌ها جداگانه می‌آید.",
+            deEx2: "Bitte verpacken Sie diese Artikel separat.",
+            faEx2: "لطفاً این اقلام را به‌صورت جداگانه بسته‌بندی کنید."
+        },
+        {
+            de: "die Infrastruktur",
+            fa: "زیرساخت",
+            deEx1: "Eine gute Infrastruktur ist wichtig für die Wirtschaft.",
+            faEx1: "یک زیرساخت خوب برای اقتصاد مهم است.",
+            deEx2: "Die Stadt investiert viel Geld in die digitale Infrastruktur.",
+            faEx2: "شهر پول زیادی روی زیرساخت دیجیتال سرمایه‌گذاری می‌کند."
+        },
+        {
+            de: "der Weizen",
+            fa: "گندم",
+            deEx1: "Aus Weizen wird Mehl für das Brot hergestellt.",
+            faEx1: "از گندم آرد برای پخت نان تهیه می‌شود.",
+            deEx2: "Die Bauern ernten im Sommer den Weizen.",
+            faEx2: "کشاورزان در تابستان گندم را درو می‌کنند."
+        },
+        {
+            de: "die Urerzeugung",
+            fa: "تولید اولیه / بخش اولیه اقتصاد",
+            deEx1: "Die Landwirtschaft gehört zur Urerzeugung.",
+            faEx1: "کشاورزی جزء تولید اولیه محسوب می‌شود.",
+            deEx2: "Produkte der Urerzeugung bilden die Basis für die Weiterverarbeitung.",
+            faEx2: "محصولات تولید اولیه، پایه و اساس فرآوری بعدی را تشکیل می‌دهند."
+        },
+        {
+            de: "ernten",
+            fa: "برداشت کردن / درو کردن",
+            deEx1: "Im Herbst ernten die Gärtner die Äpfel.",
+            faEx1: "در پاییز باغبان‌ها سیب‌ها را برداشت می‌کنند.",
+            deEx2: "Wir ernten das Gemüse direkt aus unserem Garten.",
+            faEx2: "ما سبزیجات را مستقیماً از باغچه خودمان برداشت می‌کنیم."
+        },
+        {
+            de: "die Müllabfuhr",
+            fa: "خدمات جمع‌آوری زباله / شهرداری",
+            deEx1: "Morgen früh kommt die Müllabfuhr und holt die Tonnen ab.",
+            faEx1: "فردا صبح خدمات جمع‌آوری زباله می‌آید و سطل‌ها را می‌برد.",
+            deEx2: "Vergiss nicht, die Mülltonne rechtzeitig für die Müllabfuhr rauszustellen.",
+            faEx2: "فراموش نکن که سطل زباله را به‌موقع برای ماشین حمل زباله بیرون بگذاری."
+        },
+        {
+            de: "der Vermittler",
+            fa: "واسطه / دلال / میانجی",
+            deEx1: "Der Vermittler half uns beim Kauf der Wohnung.",
+            faEx1: "واسطه در خرید آپارتمان به ما کمک کرد.",
+            deEx2: "Sie agierte als Vermittlerin zwischen den beiden Parteien.",
+            faEx2: "او به عنوان میانجی بین دو حزب عمل کرد."
+        },
+        {
+            de: "der Schriftverkehr",
+            fa: "مکاتبات کتبی / نامه‌نگاری",
+            deEx1: "Der gesamte Schriftverkehr läuft über unsere Abteilung.",
+            faEx1: "تمام مکاتبات از طریق بخش ما انجام می‌شود.",
+            deEx2: "Ich habe den wichtigen Schriftverkehr sicher abgeheftet.",
+            faEx2: "من مکاتبات مهم را با اطمینان بایگانی کرده‌ام."
+        },
+        {
+            de: "das Organigramm",
+            fa: "نمودار سازمانی",
+            deEx1: "Im Organigramm kann man die Hierarchie des Unternehmens sehen.",
+            faEx1: "در نمودار سازمانی می‌توان سلسله‌مراتب شرکت را دید.",
+            deEx2: "Die neue Abteilungsleitung ist im Organigramm eingetragen.",
+            faEx2: "مدیریت جدید بخش در نمودار سازمانی ثبت شده است."
+        },
+        {
+            de: "die Instanz",
+            fa: "مرجع / مرجع رسیدگی",
+            deEx1: "Das Gericht ist die letzte Instanz in diesem Streit.",
+            faEx1: "دادگاه آخرین مرجع در این اختلاف است.",
+            deEx2: "Bei Problemen ist der Vorgesetzte die nächste Instanz.",
+            faEx2: "در صورت بروز مشکل، مدیر مافوق مرجع بعدی است."
+        },
+        {
+            de: "die Anweisung",
+            fa: "دستورالعمل / فرمان",
+            deEx1: "Bitte befolgen Sie genau die Anweisungen des Arztes.",
+            faEx1: "لطفاً دقیقاً دستورالعمل‌های پزشک را دنبال کنید.",
+            deEx2: "Der Chef gab uns eine klare Anweisung für das Projekt.",
+            faEx2: "رئیس دستورالعمل روشنی برای پروژه به ما داد."
+        },
+        {
+            de: "die Kompetenz",
+            fa: "شایستگی / مهارت / تخصص",
+            deEx1: "Er besitzt eine hohe fachliche Kompetenz in der IT.",
+            faEx1: "او دارای شایستگی تخصصی بالایی در زمینه فناوری اطلاعات است.",
+            deEx2: "Soziale Kompetenzen sind im Berufsleben sehr wichtig.",
+            faEx2: "مهارت‌های اجتماعی در زندگی شغلی بسیار مهم هستند."
+        },
+        {
+            de: "die Transparenz",
+            fa: "شفافیت",
+            deEx1: "Die Firma legt großen Wert auf Transparenz bei den Finanzen.",
+            faEx1: "این شرکت اهمیت زیادی برای شفافیت در امور مالی قائل است.",
+            deEx2: "Mehr Transparenz schafft Vertrauen bei den Kunden.",
+            faEx2: "شفافیت بیشتر باعث ایجاد اعتماد نزد مشتریان می‌شود."
+        },
+        {
+            de: "widersprüchlich",
+            fa: "متناقض / ضد و نقیض",
+            deEx1: "Die Zeugen machten widersprüchliche Aussagen bei der Polizei.",
+            faEx1: "شهود اظهارات متناقضی در پلیس ارائه کردند.",
+            deEx2: "Ich habe zwei widersprüchliche Informationen erhalten.",
+            faEx2: "من دو اطلاعات متناقض دریافت کرده‌ام."
+        },
+        {
+            de: "der Gläubiger",
+            fa: "طلبکار / بستانکار",
+            deEx1: "Der Gläubiger fordert die Rückzahlung des Kredits.",
+            faEx1: "طلبکار خواستار بازپرداخت وام است.",
+            deEx2: "Das Unternehmen muss seine Gläubiger pünktlich bezahlen.",
+            faEx2: "شرکت باید طلبکاران خود را به‌موقع پرداخت کند."
+        },
+        {
+            de: "pfänden",
+            fa: "ضبط کردن / مصادره کردن اموال (بابت بدهی)",
+            deEx1: "Das Gericht ließ das Auto des Schuldners pfänden.",
+            faEx1: "دادگاه دستور مصادره خودروی بدهکار را داد.",
+            deEx2: "Bei Zahlungsverzug kann das Gehalt gepfändet werden.",
+            faEx2: "در صورت تأخیر در پرداخت، حقوق می‌تواند مصادره شود."
+        },
+        {
+            de: "die Insolvenz",
+            fa: "ورشکستگی",
+            deEx1: "Das Geschäft musste wegen Insolvenz schließen.",
+            faEx1: "مغازه به دلیل ورشکستگی مجبور به تعطیلی شد.",
+            deEx2: "Die Firma hat gestern Insolvenz angemeldet.",
+            faEx2: "شرکت دیروز اعلام ورشکستگی کرد."
+        },
+        {
+            de: "die Rivalität",
+            fa: "رقابت / رقابت‌جویی",
+            deEx1: "Zwischen den beiden Firmen herrscht eine große Rivalität.",
+            faEx1: "بین این دو شرکت رقابت شدیدی وجود دارد.",
+            deEx2: "Die sportliche Rivalität motiviert die Athleten zu Höchstleistungen.",
+            faEx2: "رقابت ورزشی ورزشکاران را به عملکردهای برتر ترغیب می‌کند."
+        },
+        {
+            de: "das Substitutionsgut",
+            fa: "کالای جایگزین",
+            deEx1: "Butter und Margarine sind klassische Substitutionsgüter.",
+            faEx1: "کره و مارگارین کالاهای جایگزین کلاسیک هستند.",
+            deEx2: "Ein Substitutionsgut kann ein anderes Produkt ersetzen.",
+            faEx2: "یک کالای جایگزین می‌تواند محصول دیگری را جایگزین کند."
+        },
+        {
+            de: "komplementär",
+            fa: "مکمل / متمم",
+            deEx1: "Drucker und Patronen sind komplementäre Produkte.",
+            faEx1: "پرینتر و کارتریج محصولات مکمل هستند.",
+            deEx2: "Ihre Fähigkeiten ergänzen sich komplementär im Team.",
+            faEx2: "مهارت‌های آن‌ها به صورت مکمل یکدیگر را در تیم تکمیل می‌کنند."
+        },
+        {
+            de: "die Produktion",
+            fa: "تولید / ساخت",
+            deEx1: "Die Produktion der neuen Möbel beginnt nächste Woche.",
+            faEx1: "تولید مبلمان جدید هفته آینده آغاز می‌شود.",
+            deEx2: "In der Fabrik läuft die Produktion rund um die Uhr.",
+            faEx2: "در کارخانه، تولید به صورت شبانه‌روزی در حال انجام است."
+        },
+        {
+            de: "der Faktor",
+            fa: "عامل / فاکتور",
+            deEx1: "Das Wetter ist ein wichtiger Faktor bei der Ernte.",
+            faEx1: "آب‌وهوا عامل مهمی در برداشت محصول است.",
+            deEx2: "Viele Faktoren beeinflussen die Entscheidung der Kunden.",
+            faEx2: "عوامل زیادی بر تصمیم مشتریان تأثیر می‌گذارند."
+        },
+        {
+            de: "der Produktionsfaktor",
+            fa: "عامل تولید (زمین، کار، سرمایه)",
+            deEx1: "Arbeit und Kapital sind wesentliche Produktionsfaktoren.",
+            faEx1: "کار و سرمایه از عوامل اصلی تولید هستند.",
+            deEx2: "Ein effizienter Einsatz der Produktionsfaktoren spart Kosten.",
+            faEx2: "استفاده کارآمد از عوامل تولید باعث کاهش هزینه‌ها می‌شود."
+        },
+        {
+            de: "pleitegehen",
+            fa: "ورشکست شدن / بی‌پول شدن",
+            deEx1: "Wenn wir keine Kunden finden, werden wir pleitegehen.",
+            faEx1: "اگر مشتری پیدا نکنیم، ورشکست خواهیم شد.",
+            deEx2: "Das Restaurant ist im letzten Jahr leider pleitegegangen.",
+            faEx2: "متأسفانه آن رستوران سال گذشته ورشکست شد."
+        }
+    ];
+
+    let currentIndex = 0;
+    const card = document.getElementById('card');
+    const cardContainer = document.getElementById('cardContainer');
+
+    function updateCard() {
+        const item = vocabData[currentIndex];
+        document.getElementById('deWord').textContent = item.de;
+        document.getElementById('deEx1').textContent = item.deEx1;
+        document.getElementById('deEx2').textContent = item.deEx2;
+
+        document.getElementById('faWord').textContent = item.fa;
+        document.getElementById('faEx1').textContent = item.faEx1;
+        document.getElementById('faEx2').textContent = item.faEx2;
+
+        document.getElementById('progress').textContent = `Karte ${currentIndex + 1} von ${vocabData.length}`;
+        card.classList.remove('flipped');
+    }
+
+    function flipCard() {
+        card.classList.toggle('flipped');
+    }
+
+    function nextCard() {
+        currentIndex = (currentIndex + 1) % vocabData.length;
+        updateCard();
+    }
+
+    function prevCard() {
+        currentIndex = (currentIndex - 1 + vocabData.length) % vocabData.length;
+        updateCard();
+    }
+
+    function shuffleCards() {
+        for (let i = vocabData.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [vocabData[i], vocabData[j]] = [vocabData[j], vocabData[i]];
+        }
+        currentIndex = 0;
+        updateCard();
+    }
+
+    function speakText(event, elementId, lang) {
+        event.stopPropagation();
+        const text = document.getElementById(elementId).textContent;
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.rate = lang.startsWith('de') ? 0.88 : 0.95;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    cardContainer.addEventListener('click', flipCard);
+    updateCard();
+</script>
+
+</body>
+</html>
