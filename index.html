@@ -1,62 +1,226 @@
-🔗 Meine Linksammlung
-Deutsch & Englisch
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meine Linksammlung</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-🇩🇪 Deutsch
-1
-Folie 1
-🔗
-2
-Folie 2
-🔗
-3
-Folie 3
-🔗
-4
-Folie 4
-🔗
-5
-Folie 5
-🔗
-6
-Folie 6
-🔗
-7
-Folie 7
-🔗
-8
-Folie 8
-🔗
-9
-Folie 9
-🔗
-10
-Folie 10
-🔗
-🇬🇧 English
-1
-Slide 1
-🔗
-2
-Slide 2
-🔗
-3
-Slide 3
-🔗
-4
-Slide 4
-🔗
-5
-Slide 5
-🔗
-6
-Slide 6
-🔗
-7
-Slide 7
-🔗
-8
-Slide 8
-🔗
-9
-Slide 9
-🔗
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      background: white;
+      border-radius: 2rem;
+      padding: 2rem;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+    }
+
+    .kopf {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 3px solid #667eea;
+    }
+
+    .kopf h1 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 0.3rem;
+    }
+
+    .kopf p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .spalte h2 {
+      font-size: 1.2rem;
+      color: #555;
+      margin-bottom: 1rem;
+      padding-left: 0.5rem;
+      border-left: 4px solid #764ba2;
+    }
+
+    .link-folie {
+      display: flex;
+      align-items: center;
+      background: #f8f9fa;
+      margin-bottom: 0.8rem;
+      padding: 1rem 1.2rem;
+      border-radius: 1rem;
+      text-decoration: none;
+      color: #333;
+      border-left: 5px solid #667eea;
+      border-right: 5px solid #667eea;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .link-folie:hover {
+      transform: translateY(-3px) scale(1.02);
+      background: #f0f2ff;
+      border-left-color: #764ba2;
+      border-right-color: #764ba2;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+
+    .nummer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 32px;
+      height: 32px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-right: 1rem;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+
+    .link-folie:hover .nummer {
+      background: #764ba2;
+    }
+
+    .info {
+      flex: 1;
+    }
+
+    .titel {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #222;
+    }
+
+    .beschreibung {
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 0.2rem;
+    }
+
+    .zeichen {
+      font-size: 1.2rem;
+      margin-left: 1rem;
+      opacity: 0.5;
+      transition: opacity 0.3s;
+    }
+
+    .link-folie:hover .zeichen {
+      opacity: 1;
+    }
+
+    @media (max-width: 700px) {
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .container {
+        padding: 1.2rem;
+      }
+      .kopf h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="kopf">
+    <h1>🔗 Meine Linksammlung</h1>
+    <p>Deutsch &amp; Englisch</p>
+  </div>
+
+  <div class="grid">
+    <!-- LINKE SPALTE: DEUTSCH -->
+    <div class="spalte">
+      <h2>🇩🇪 Deutsch</h2>
+      <div id="container-deutsch"></div>
+    </div>
+
+    <!-- RECHTE SPALTE: ENGLISCH -->
+    <div class="spalte">
+      <h2>🇬🇧 English</h2>
+      <div id="container-englisch"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ==========================================
+  // HIER KANNST DU UNENDLICH VIELE LINKS EINFÜGEN:
+  // ==========================================
+
+  const linksDeutsch = [
+    { url: "30-1.html", titel: "Folie 1" },
+    { url: "30-2.html", titel: "Folie 2" },
+    { url: "30-3.html", titel: "Folie 3" },
+    { url: "30-4.html", titel: "Folie 4" },
+    { url: "30-5.html", titel: "Folie 5" },
+    { url: "30-6.html", titel: "Folie 6" },
+    { url: "30-7.html", titel: "Folie 7" },
+    { url: "30-8.html", titel: "Folie 8" },
+    { url: "30-9.html", titel: "Folie 9" },
+    { url: "D-10.html", titel: "Folie 10" },
+    // Füge hier einfach weitere ein, z.B.:
+    // { url: "30-11.html", titel: "Folie 11" },
+  ];
+
+  const linksEnglisch = [
+    { url: "E1.html", titel: "Slide 1" },
+    { url: "E2.html", titel: "Slide 2" },
+    { url: "E3.html", titel: "Slide 3" },
+    { url: "E4.html", titel: "Slide 4" },
+    { url: "E5.html", titel: "Slide 5" },
+    { url: "E6.html", titel: "Slide 6" },
+    { url: "E7.html", titel: "Slide 7" },
+    { url: "E8.html", titel: "Slide 8" },
+    { url: "E9.html", titel: "Slide 9" },
+    // Füge hier einfach weitere ein, z.B.:
+    // { url: "E10.html", titel: "Slide 10" },
+  ];
+
+  // Funktion zum Generieren der HTML-Elemente
+  function renderLinks(liste, containerId) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = liste.map((item, index) => `
+      <a href="${item.url}" class="link-folie" target="_blank">
+        <span class="nummer">${index + 1}</span>
+        <div class="info">
+          <div class="titel">${item.titel}</div>
+        </div>
+        <span class="zeichen">🔗</span>
+      </a>
+    `).join('');
+  }
+
+  // Links anzeigen
+  renderLinks(linksDeutsch, 'container-deutsch');
+  renderLinks(linksEnglisch, 'container-englisch');
+</script>
+
+</body>
+</html>
