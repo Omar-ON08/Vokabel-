@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabeltrainer - Interaktives Kartenlernen</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* 3D Card Flip Animation */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        /* Custom Scrollbar for example sentences */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(241, 245, 249, 0.5);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 bg-slate-900 antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- Header Section -->
+    <header class="w-full pt-6 pb-2 px-4 flex flex-col items-center shrink-0">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight text-center">
+            Vokabeltrainer
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 font-medium mt-1 text-center">
+            Englisch <span class="text-blue-400">➔</span> Deutsch
+        </p>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-3xl w-full mx-auto px-4 py-2 sm:py-4 flex flex-col items-center justify-between">
+        
+        <!-- Top Status & Progress Bar -->
+        <div class="w-full max-w-xl flex flex-col items-center gap-2 mb-2 sm:mb-4">
+            <div class="flex items-center justify-between w-full text-xs sm:text-sm font-semibold text-slate-300">
+                <span id="card-counter" class="bg-slate-800 border border-slate-700/80 px-3.5 py-1.5 rounded-full shadow-inner">
+                    Karte <span id="current-index" class="text-blue-400 font-bold">1</span> von <span id="total-cards">44</span>
+                </span>
+                
+                <!-- Filter / Mode Badge -->
+                <div class="flex items-center gap-2">
+                    <button id="speaker-test-btn" onclick="speakCurrentWord(event)" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-full border border-slate-700 transition active:scale-95 text-xs">
+                        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                        </svg>
+                        <span>Audio vorlesen</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Visual Progress Bar -->
+            <div class="w-full bg-slate-800/80 h-2 rounded-full overflow-hidden border border-slate-700/50">
+                <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-500 h-full w-0 transition-all duration-300 ease-out"></div>
+            </div>
+        </div>
+
+        <!-- 3D Flashcard Container -->
+        <div class="w-full max-w-xl perspective-1000 flex-1 min-h-[360px] sm:min-h-[420px] max-h-[500px]">
+            <div id="flashcard" onclick="flipCard()" class="relative w-full h-full transform-style-3d transition-transform duration-500 cursor-pointer group shadow-2xl rounded-3xl">
+                
+                <!-- FRONT OF CARD (ENGLISH) -->
+                <div class="absolute inset-0 w-full h-full backface-hidden bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-8 flex flex-col justify-between items-center text-center shadow-xl">
+                    <!-- Top Info Label -->
+                    <div class="w-full flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        <span>ENGLISCH (VORDERSEITE)</span>
+                        <span class="text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">Klick zum Wenden</span>
+                    </div>
+
+                    <!-- Main English Word -->
+                    <div class="my-auto py-4 flex flex-col items-center justify-center gap-3">
+                        <h2 id="card-english-word" class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                            primarily
+                        </h2>
+                        <button onclick="speakCurrentWord(event)" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition border border-blue-200/60 active:scale-95 text-xs font-semibold group/btn" title="Aussprache anhören">
+                            <svg class="w-4 h-4 text-blue-600 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                            </svg>
+                            <span id="card-phonetic" class="font-mono text-slate-600">/ˈpraɪmərɪli/</span>
+                        </button>
+                    </div>
+
+                    <!-- Hint / Footnote -->
+                    <p class="text-xs text-slate-400 font-medium">
+                        Klicke auf die Karte oder 'Umdrehen' zum Wenden
+                    </p>
+                </div>
+
+                <!-- BACK OF CARD (GERMAN + DETAILS) -->
+                <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-xl overflow-hidden">
+                    <!-- Top Info Label & Part of Speech -->
+                    <div class="w-full flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-3">
+                        <span>DEUTSCH (RÜCKSEITE)</span>
+                        <span id="card-type" class="text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full font-bold border border-indigo-100 lowercase">
+                            Adverb
+                        </span>
+                    </div>
+
+                    <!-- German Translation -->
+                    <div class="text-center py-2 my-auto">
+                        <h2 id="card-german-word" class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                            primär, hauptsächlich
+                        </h2>
+                    </div>
+
+                    <!-- 2 Daily Example Sentences -->
+                    <div class="w-full bg-slate-50/90 border border-slate-200/80 rounded-2xl p-3.5 sm:p-4 text-left space-y-2.5 my-auto max-h-[190px] overflow-y-auto custom-scrollbar">
+                        <div class="text-xs sm:text-sm">
+                            <p id="ex-en-1" class="font-medium text-slate-800">1. This project is primarily focused on renewable energy.</p>
+                            <p id="ex-de-1" class="text-xs text-slate-500 italic mt-0.5">Dieses Projekt konzentriert sich hauptsächlich auf erneuerbare Energien.</p>
+                        </div>
+                        <div class="w-full border-t border-slate-200/60"></div>
+                        <div class="text-xs sm:text-sm">
+                            <p id="ex-en-2" class="font-medium text-slate-800">2. She is primarily responsible for marketing.</p>
+                            <p id="ex-de-2" class="text-xs text-slate-500 italic mt-0.5">Sie ist hauptsächlich für das Marketing verantwortlich.</p>
+                        </div>
+                    </div>
+
+                    <!-- Footnote -->
+                    <div class="text-center pt-2">
+                        <span class="text-xs text-slate-400 font-medium">Klicke erneut zum Zurückdrehen</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Action Control Buttons -->
+        <div class="w-full max-w-xl mt-4 sm:mt-6 flex flex-col gap-3">
+            <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                <!-- Previous Button -->
+                <button onclick="prevCard()" class="flex items-center justify-center gap-1.5 bg-slate-700 hover:bg-slate-600 active:bg-slate-800 text-white font-semibold py-3 px-3 sm:px-4 rounded-xl shadow-lg transition duration-150 active:scale-95 text-xs sm:text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    <span>Zurück</span>
+                </button>
+
+                <!-- Flip Button -->
+                <button onclick="flipCard()" class="flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-bold py-3 px-3 sm:px-4 rounded-xl shadow-lg shadow-blue-600/30 transition duration-150 active:scale-95 text-xs sm:text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span>Umdrehen</span>
+                </button>
+
+                <!-- Next Button -->
+                <button onclick="nextCard()" class="flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-semibold py-3 px-3 sm:px-4 rounded-xl shadow-lg shadow-blue-600/30 transition duration-150 active:scale-95 text-xs sm:text-sm">
+                    <span>Weiter / Skip</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Utility Row (Shuffle) -->
+            <div class="flex justify-center">
+                <button onclick="shuffleCards()" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-300 font-semibold py-2.5 px-6 rounded-xl transition duration-150 active:scale-95 text-xs sm:text-sm hover:text-white">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                    </svg>
+                    <span>Mischen</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-3 text-center text-xs text-slate-500 shrink-0">
+        Tastaturkürzel: <kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded border border-slate-700">Leertaste</kbd> Umdrehen | <kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded border border-slate-700">←</kbd> Zurück | <kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded border border-slate-700">→</kbd> Weiter
+    </footer>
+
+    <!-- JavaScript Data and Application Logic -->
+    <script>
+        // Complete dataset based on requested word list
+        const vocabData = [
+            {
+                en: "primarily",
+                de: "primär, hauptsächlich",
+                type: "Adverb",
+                phonetic: "/ˈpraɪmərəlɪ/",
+                ex1_en: "This project is primarily focused on renewable energy.",
+                ex1_de: "Dieses Projekt konzentriert sich hauptsächlich auf erneuerbare Energien.",
+                ex2_en: "She is primarily responsible for marketing.",
+                ex2_de: "Sie ist hauptsächlich für das Marketing verantwortlich."
+            },
+            {
+                en: "avoid",
+                de: "vermeiden",
+                type: "Verb (Infinitiv)",
+                phonetic: "/əˈvɔɪd/",
+                ex1_en: "You should avoid driving during rush hour.",
+                ex1_de: "Du solltest das Autofahren während der Stoßzeit vermeiden.",
+                ex2_en: "Try to avoid making mistakes in your report.",
+                ex2_de: "Versuche, Fehler in deinem Bericht zu vermeiden."
+            },
+            {
+                en: "guild",
+                de: "Gilde, Zunft",
+                type: "Substantiv",
+                phonetic: "/ɡɪld/",
+                ex1_en: "In medieval times, each craft had its own guild.",
+                ex1_de: "Im Mittelalter hatte jedes Handwerk seine eigene Zunft.",
+                ex2_en: "The writers' guild went on strike for better pay.",
+                ex2_de: "Die Autorenvereinigung trat für eine bessere Bezahlung in Streik."
+            },
+            {
+                en: "discourage",
+                de: "entmutigen, abhalten",
+                type: "Verb (Infinitiv)",
+                phonetic: "/dɪsˈkʌrɪdʒ/",
+                ex1_en: "Don't let failures discourage you from trying again.",
+                ex1_de: "Lass dich von Rückschlägen nicht entmutigen, es noch einmal zu versuchen.",
+                ex2_en: "The high prices discourage many customers from buying.",
+                ex2_de: "Die hohen Preise halten viele Kunden vom Kauf ab."
+            },
+            {
+                en: "roughest",
+                de: "am rauesten, am härtesten",
+                type: "Adjektiv (Superlativ)",
+                phonetic: "/ˈrʌfɪst/",
+                ex1_en: "Winter in the mountains can be the roughest time of the year.",
+                ex1_de: "Der Winter in den Bergen kann die härteste Zeit des Jahres sein.",
+                ex2_en: "This was the roughest part of the entire hiking trail.",
+                ex2_de: "Das war der raueste Teil des gesamten Wanderwegs."
+            },
+            {
+                en: "eager",
+                de: "eifrig, gespannt, versessen",
+                type: "Adjektiv",
+                phonetic: "/ˈiːɡər/",
+                ex1_en: "The students were eager to learn about the new topic.",
+                ex1_de: "Die Schüler waren eifrig darauf aus, das neue Thema zu lernen.",
+                ex2_en: "She is eager to start her new job next week.",
+                ex2_de: "Sie ist gespannt darauf, nächste Woche ihren neuen Job anzufangen."
+            },
+            {
+                en: "nuts",
+                de: "verrückt; Nüsse",
+                type: "Adjektiv / Substantiv",
+                phonetic: "/nʌts/",
+                ex1_en: "Are you nuts? You can't jump from there!",
+                ex1_de: "Bist du verrückt? Da kannst du nicht runterspringen!",
+                ex2_en: "She is allergic to peanuts and other nuts.",
+                ex2_de: "Sie ist allergisch gegen Erdnüsse und andere Nüsse."
+            },
+            {
+                en: "environment",
+                de: "Umwelt, Umfeld",
+                type: "Substantiv",
+                phonetic: "/ɪnˈvaɪrənmənt/",
+                ex1_en: "We must protect our environment for future generations.",
+                ex1_de: "Wir müssen unsere Umwelt für zukünftige Generationen schützen.",
+                ex2_en: "Working in a quiet environment helps me concentrate.",
+                ex2_de: "In einer ruhigen Umgebung zu arbeiten hilft mir, mich zu konzentrieren."
+            },
+            {
+                en: "cause",
+                de: "verursachen; Ursache",
+                type: "Verb / Substantiv",
+                phonetic: "/kɔːz/",
+                ex1_en: "Bad weather can cause major delays in traffic.",
+                ex1_de: "Schlechtes Wetter kann große Verzögerungen im Verkehr verursachen.",
+                ex2_en: "Scientists are still searching for the cause of the disease.",
+                ex2_de: "Wissenschaftler suchen immer noch nach der Ursache der Krankheit."
+            },
+            {
+                en: "legacy",
+                de: "Vermächtnis, Erbe",
+                type: "Substantiv",
+                phonetic: "/ˈleɡəsi/",
+                ex1_en: "The artist left a rich cultural legacy behind.",
+                ex1_de: "Der Künstler hinterließ ein reiches kulturelles Vermächtnis.",
+                ex2_en: "Her grandfather's legacy inspired her to become a doctor.",
+                ex2_de: "Das Vermächtnis ihres Großvaters inspirierte sie dazu, Ärztin zu werden."
+            },
+            {
+                en: "hustling",
+                de: "schuften, sich anstrengen",
+                type: "Verb (Partizip)",
+                phonetic: "/ˈhʌslɪŋ/",
+                ex1_en: "He has been hustling all week to finish the project on time.",
+                ex1_de: "Er hat die ganze Woche hart geschuftet, um das Projekt rechtzeitig fertigzustellen.",
+                ex2_en: "In this city, everyone is constantly hustling to make a living.",
+                ex2_de: "In dieser Stadt schuftet jeder ständig, um seinen Lebensunterhalt zu verdienen."
+            },
+            {
+                en: "certainly",
+                de: "sicherlich, gewiss",
+                type: "Adverb",
+                phonetic: "/ˈsɜːrtnli/",
+                ex1_en: "I will certainly help you with your homework.",
+                ex1_de: "Ich werde dir sicherlich bei den Hausaufgaben helfen.",
+                ex2_en: "That is certainly one way to solve the problem.",
+                ex2_de: "Das ist sicherlich eine Möglichkeit, das Problem zu lösen."
+            },
+            {
+                en: "vocational",
+                de: "beruflich, Fach-",
+                type: "Adjektiv",
+                phonetic: "/voʊˈkeɪʃənl/",
+                ex1_en: "She decided to attend a vocational school to learn carpentry.",
+                ex1_de: "Sie beschloss, eine Berufsschule zu besuchen, um Tischlerin zu lernen.",
+                ex2_en: "Vocational training is very important for the job market.",
+                ex2_de: "Berufsausbildung ist sehr wichtig für den Arbeitsmarkt."
+            },
+            {
+                en: "martyrdom",
+                de: "Märtyrertum",
+                type: "Substantiv",
+                phonetic: "/ˈmɑːrtərdəm/",
+                ex1_en: "Throughout history, some figures achieved fame through martyrdom.",
+                ex1_de: "Im Laufe der Geschichte erlangten einige Persönlichkeiten durch Märtyrertum Berühmtheit.",
+                ex2_en: "He refused to accept unnecessary martyrdom for the cause.",
+                ex2_de: "Er weigerte sich, ein unnötiges Märtyrertum für die Sache anzunehmen."
+            },
+            {
+                en: "expectations",
+                de: "Erwartungen",
+                type: "Substantiv (Plural)",
+                phonetic: "/ˌekspekˈteɪʃnz/",
+                ex1_en: "The new movie exceeded all my expectations.",
+                ex1_de: "Der neue Film hat alle meine Erwartungen übertroffen.",
+                ex2_en: "Parents often have high expectations for their children.",
+                ex2_de: "Eltern haben oft hohe Erwartungen an ihre Kinder."
+            },
+            {
+                en: "interference",
+                de: "Einmischung, Störung",
+                type: "Substantiv",
+                phonetic: "/ˌɪntərˈfɪrəns/",
+                ex1_en: "There was radio interference during the broadcast.",
+                ex1_de: "Während der Übertragung gab es Funkstörungen.",
+                ex2_en: "She resented her family's interference in her personal life.",
+                ex2_de: "Sie ärgerte sich über die Einmischung ihrer Familie in ihr Privatleben."
+            },
+            {
+                en: "office supplies",
+                de: "Bürobedarf",
+                type: "Substantiv",
+                phonetic: "/ˈɒfɪs səˈplaɪz/",
+                ex1_en: "We need to order more office supplies like paper and pens.",
+                ex1_de: "Wir müssen mehr Bürobedarf wie Papier und Stifte bestellen.",
+                ex2_en: "The company provides all necessary office supplies for its employees.",
+                ex2_de: "Das Unternehmen stellt seinen Mitarbeitern den gesamten nötigen Bürobedarf zur Verfügung."
+            },
+            {
+                en: "application status",
+                de: "Bewerbungsstatus",
+                type: "Substantiv",
+                phonetic: "/ˌæplɪˈkeɪʃn ˈsteɪtəs/",
+                ex1_en: "You can check your application status online on our portal.",
+                ex1_de: "Sie können Ihren Bewerbungsstatus online auf unserem Portal überprüfen.",
+                ex2_en: "I received an email update regarding my application status.",
+                ex2_de: "Ich habe ein E-Mail-Update bezüglich meines Bewerbungsstatus erhalten."
+            },
+            {
+                en: "occasionally",
+                de: "gelegentlich, ab und zu",
+                type: "Adverb",
+                phonetic: "/əˈkeɪʒnəli/",
+                ex1_en: "We occasionally go out to eat on weekends.",
+                ex1_de: "Wir gehen am Wochenende gelegentlich auswärts essen.",
+                ex2_en: "She occasionally writes articles for the local newspaper.",
+                ex2_de: "Sie schreibt gelegentlich Artikel für die Lokalzeitung."
+            },
+            {
+                en: "economic sectors",
+                de: "Wirtschaftssektoren",
+                type: "Substantiv (Plural)",
+                phonetic: "/ˌiːkəˈnɒmɪk ˈsektərz/",
+                ex1_en: "Agriculture and industry are major economic sectors.",
+                ex1_de: "Landwirtschaft und Industrie sind wichtige Wirtschaftssektoren.",
+                ex2_en: "The government invests in developing modern economic sectors.",
+                ex2_de: "Die Regierung investiert in die Entwicklung moderner Wirtschaftssektoren."
+            },
+            {
+                en: "separate",
+                de: "trennen; getrennt",
+                type: "Verb / Adjektiv",
+                phonetic: "/ˈsepəreɪt/",
+                ex1_en: "Please separate the recyclables from regular trash.",
+                ex1_de: "Bitte trenne den Wertstoffmüll vom normalen Hausmüll.",
+                ex2_en: "Keep the two chemical solutions in separate containers.",
+                ex2_de: "Bewahren Sie die beiden chemischen Lösungen in getrennten Behältern auf."
+            },
+            {
+                en: "infrastructure",
+                de: "Infrastruktur",
+                type: "Substantiv",
+                phonetic: "/ˈɪnfrəˌstrʌktʃər/",
+                ex1_en: "The city is investing heavily in public transport infrastructure.",
+                ex1_de: "Die Stadt investiert stark in die Infrastruktur des öffentlichen Verkehrs.",
+                ex2_en: "Good infrastructure is essential for economic growth.",
+                ex2_de: "Eine gute Infrastruktur ist für das Wirtschaftswachstum unerlässlich."
+            },
+            {
+                en: "wheat",
+                de: "Weizen",
+                type: "Substantiv",
+                phonetic: "/wiːt/",
+                ex1_en: "Farmers grow a lot of wheat in this region.",
+                ex1_de: "Landwirte bauen in dieser Region viel Weizen an.",
+                ex2_en: "Whole wheat bread is healthier than white bread.",
+                ex2_de: "Vollkornbrot ist gesünder als Weißbrot."
+            },
+            {
+                en: "primary production",
+                de: "Primärproduktion, Urproduktion",
+                type: "Substantiv",
+                phonetic: "/ˈpraɪməri prəˈdʌkʃn/",
+                ex1_en: "Agriculture and mining belong to primary production.",
+                ex1_de: "Landwirtschaft und Bergbau gehören zur Primärproduktion.",
+                ex2_en: "Primary production extracts raw materials directly from nature.",
+                ex2_de: "Die Primärproduktion gewinnt Rohstoffe direkt aus der Natur."
+            },
+            {
+                en: "harvests",
+                de: "Ernten",
+                type: "Substantiv (Plural)",
+                phonetic: "/ˈhɑːrvɪsts/",
+                ex1_en: "Good weather leads to successful harvests this year.",
+                ex1_de: "Gutes Wetter führt in diesem Jahr zu erfolgreichen Ernten.",
+                ex2_en: "Farmers usually bring in their harvests in autumn.",
+                ex2_de: "Bauern bringen ihre Ernten normalerweise im Herbst ein."
+            },
+            {
+                en: "waste collection",
+                de: "Müllabfuhr, Abfallentsorgung",
+                type: "Substantiv",
+                phonetic: "/weɪst kəˈlekʃn/",
+                ex1_en: "Waste collection takes place every Tuesday morning.",
+                ex1_de: "Die Müllabfuhr findet jeden Dienstagmorgen statt.",
+                ex2_en: "Efficient waste collection helps keep the city clean.",
+                ex2_de: "Eine effiziente Abfallentsorgung hilft, die Stadt sauber zu halten."
+            },
+            {
+                en: "intermediary",
+                de: "Zwischenhändler, Vermittler",
+                type: "Substantiv",
+                phonetic: "/ˌɪntərˈmiːdiəri/",
+                ex1_en: "They bought the goods directly without using an intermediary.",
+                ex1_de: "Sie kauften die Waren direkt, ohne einen Zwischenhändler einzuschalten.",
+                ex2_en: "The bank acted as a neutral intermediary in the transaction.",
+                ex2_de: "Die Bank fungierte bei der Transaktion als neutraler Vermittler."
+            },
+            {
+                en: "correspondence",
+                de: "Korrespondenz, Schriftverkehr",
+                type: "Substantiv",
+                phonetic: "/ˌkɔːrəˈspɑːndəns/",
+                ex1_en: "Please keep all business correspondence for your records.",
+                ex1_de: "Bitte bewahren Sie den gesamten geschäftlichen Schriftverkehr in Ihren Unterlagen auf.",
+                ex2_en: "I spent all morning reading official correspondence.",
+                ex2_de: "Ich habe den ganzen Morgen damit verbracht, offizielle Korrespondenz zu lesen."
+            },
+            {
+                en: "organizational chart",
+                de: "Organigramm",
+                type: "Substantiv",
+                phonetic: "/ˌɔːrɡənəˈzeɪʃənl tʃɑːrt/",
+                ex1_en: "The organizational chart shows the company's hierarchy.",
+                ex1_de: "Das Organigramm zeigt die Hierarchie des Unternehmens.",
+                ex2_en: "New employees should review the organizational chart to understand team roles.",
+                ex2_de: "Neue Mitarbeiter sollten das Organigramm prüfen, um Teamrollen zu verstehen."
+            },
+            {
+                en: "authority level",
+                de: "Befugnisstufe, Autoritätsebene",
+                type: "Substantiv",
+                phonetic: "/əˈθɔːrəti ˈlevl/",
+                ex1_en: "Only managers with high authority level can approve large expenses.",
+                ex1_de: "Nur Manager mit hoher Befugnisstufe können große Ausgaben genehmigen.",
+                ex2_en: "Each authority level has distinct financial permissions.",
+                ex2_de: "Jede Befugnisstufe hat eigene finanzielle Berechtigungen."
+            },
+            {
+                en: "instructions",
+                de: "Anweisungen, Anleitung",
+                type: "Substantiv (Plural)",
+                phonetic: "/ɪnˈstrʌkʃnz/",
+                ex1_en: "Read the assembly instructions carefully before building the shelf.",
+                ex1_de: "Lies die Montageanweisungen sorgfältig durch, bevor du das Regal aufbaust.",
+                ex2_en: "The supervisor gave clear instructions for the upcoming project.",
+                ex2_de: "Der Vorgesetzte gab klare Anweisungen für das anstehende Projekt."
+            },
+            {
+                en: "competencies",
+                de: "Kompetenzen, Fähigkeiten",
+                type: "Substantiv (Plural)",
+                phonetic: "/ˈkɑːmpɪtənsiz/",
+                ex1_en: "Digital literacy is one of the core competencies for modern jobs.",
+                ex1_de: "Digitale Kompetenz ist eine der Kernkompetenzen für moderne Berufe.",
+                ex2_en: "The training course aims to expand your professional competencies.",
+                ex2_de: "Der Schulungskurs zielt darauf ab, Ihre beruflichen Kompetenzen zu erweitern."
+            },
+            {
+                en: "transparency",
+                de: "Transparenz, Offenheit",
+                type: "Substantiv",
+                phonetic: "/trænsˈpærənsi/",
+                ex1_en: "The company values transparency in all financial matters.",
+                ex1_de: "Das Unternehmen legt Wert auf Transparenz in allen Finanzangelegenheiten.",
+                ex2_en: "Lack of transparency can lead to mistrust among team members.",
+                ex2_de: "Mangelnde Transparenz kann zu Misstrauen unter Teammitgliedern führen."
+            },
+            {
+                en: "contradictory",
+                de: "widersprüchlich",
+                type: "Adjektiv",
+                phonetic: "/ˌkɑːntrəˈdɪktəri/",
+                ex1_en: "The witness gave contradictory statements to the police.",
+                ex1_de: "Der Zeuge machte widersprüchliche Aussagen gegenüber der Polizei.",
+                ex2_en: "We received contradictory reports about the project deadline.",
+                ex2_de: "Wir haben widersprüchliche Berichte über die Projektfrist erhalten."
+            },
+            {
+                en: "creditor",
+                de: "Gläubiger",
+                type: "Substantiv",
+                phonetic: "/ˈkredɪtər/",
+                ex1_en: "The company owes money to its primary creditor.",
+                ex1_de: "Das Unternehmen schuldet seinem Hauptgläubiger Geld.",
+                ex2_en: "A creditor has the legal right to request debt repayment.",
+                ex2_de: "Ein Gläubiger hat das rechtliche Recht, die Rückzahlung von Schulden einzufordern."
+            },
+            {
+                en: "seize",
+                de: "beschlagnahmen, pfänden; ergreifen",
+                type: "Verb (Infinitiv)",
+                phonetic: "/siːz/",
+                ex1_en: "Customs officers can seize illegal goods at the border.",
+                ex1_de: "Zollbeamte können illegale Waren an der Grenze beschlagnahmen.",
+                ex2_en: "You should seize this great opportunity to study abroad.",
+                ex2_de: "Du solltest diese tolle Gelegenheit ergreifen, im Ausland zu studieren."
+            },
+            {
+                en: "insolvency",
+                de: "Insolvenz, Zahlungsunfähigkeit",
+                type: "Substantiv",
+                phonetic: "/ɪnˈsɑːlvənsi/",
+                ex1_en: "The firm filed for insolvency after huge financial losses.",
+                ex1_de: "Die Firma meldete nach riesigen finanziellen Verlusten Insolvenz an.",
+                ex2_en: "Early advice can help businesses avoid insolvency.",
+                ex2_de: "Frühzeitige Beratung kann Unternehmen helfen, eine Zahlungsunfähigkeit zu vermeiden."
+            },
+            {
+                en: "rivalry",
+                de: "Rivalität, Konkurrenz",
+                type: "Substantiv",
+                phonetic: "/ˈraɪvlri/",
+                ex1_en: "There is intense rivalry between the two football teams.",
+                ex1_de: "Es gibt eine intensive Rivalität zwischen den beiden Fußballmannschaften.",
+                ex2_en: "Healthy rivalry can motivate employees to perform better.",
+                ex2_de: "Gesunde Konkurrenz kann Mitarbeiter zu besseren Leistungen motivieren."
+            },
+            {
+                en: "substitution",
+                de: "Substitution, Ersatz",
+                type: "Substantiv",
+                phonetic: "/ˌsʌbstɪˈtuːʃn/",
+                ex1_en: "Butter can be used as a substitution for margarine in baking.",
+                ex1_de: "Butter kann beim Backen als Ersatz für Margarine verwendet werden.",
+                ex2_en: "Electric cars are a modern substitution for traditional petrol vehicles.",
+                ex2_de: "Elektroautos sind ein moderner Ersatz für herkömmliche Benzintherzeuge."
+            },
+            {
+                en: "complementary",
+                de: "komplementär, ergänzend",
+                type: "Adjektiv",
+                phonetic: "/ˌkɑːmplɪˈmentri/",
+                ex1_en: "The two partners have complementary skills that make them a great team.",
+                ex1_de: "Die beiden Partner haben ergänzende Fähigkeiten, die sie zu einem tollen Team machen.",
+                ex2_en: "The hotel offers complementary breakfast to all guests.",
+                ex2_de: "Das Hotel bietet allen Gästen kostenloses/ergänzendes Frühstück an."
+            },
+            {
+                en: "production",
+                de: "Produktion, Herstellung",
+                type: "Substantiv",
+                phonetic: "/prəˈdʌkʃn/",
+                ex1_en: "Car production increased by ten percent this year.",
+                ex1_de: "Die Autoproduktion stieg in diesem Jahr um zehn Prozent.",
+                ex2_en: "The factory halted production due to technical issues.",
+                ex2_de: "Die Fabrik stoppte die Produktion aufgrund technischer Probleme."
+            },
+            {
+                en: "factors",
+                de: "Faktoren, Einflussgrößen",
+                type: "Substantiv (Plural)",
+                phonetic: "/ˈfæktərz/",
+                ex1_en: "Many factors influence a customer's purchasing decision.",
+                ex1_de: "Viele Faktoren beeinflussen die Kaufentscheidung eines Kunden.",
+                ex2_en: "Stress and lack of sleep are key risk factors for health.",
+                ex2_de: "Stress und Schlafmangel sind wesentliche Risikofaktoren für die Gesundheit."
+            },
+            {
+                en: "factors of production",
+                de: "Produktionsfaktoren",
+                type: "Substantiv (Plural)",
+                phonetic: "/ˈfæktərz əv prəˈdʌkʃn/",
+                ex1_en: "Land, labor, and capital are the primary factors of production.",
+                ex1_de: "Boden, Arbeit und Kapital sind die primären Produktionsfaktoren.",
+                ex2_en: "Efficient combination of factors of production maximizes profit.",
+                ex2_de: "Eine effiziente Kombination von Produktionsfaktoren maximiert den Gewinn."
+            },
+            {
+                en: "go bankrupt",
+                de: "Pleite gehen, insolvent werden",
+                type: "Verb (Infinitiv)",
+                phonetic: "/ɡoʊ ˈbæŋkrʌpt/",
+                ex1_en: "If sales do not improve, the company might go bankrupt.",
+                ex1_de: "Wenn sich die Verkäufe nicht verbessern, könnte das Unternehmen Pleite gehen.",
+                ex2_en: "Many small shops were forced to go bankrupt during the crisis.",
+                ex2_de: "Viele kleine Läden waren gezwungen, während der Krise insolvent zu werden."
+            }
+        ];
+
+        // State Variables
+        let cards = [...vocabData];
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        // DOM Elements
+        const flashcard = document.getElementById('flashcard');
+        const currentIndexEl = document.getElementById('current-index');
+        const totalCardsEl = document.getElementById('total-cards');
+        const progressBarEl = document.getElementById('progress-bar');
+        
+        // Card Content Elements
+        const englishWordEl = document.getElementById('card-english-word');
+        const phoneticEl = document.getElementById('card-phonetic');
+        const germanWordEl = document.getElementById('card-german-word');
+        const typeEl = document.getElementById('card-type');
+        const exEn1El = document.getElementById('ex-en-1');
+        const exDe1El = document.getElementById('ex-de-1');
+        const exEn2El = document.getElementById('ex-en-2');
+        const exDe2El = document.getElementById('ex-de-2');
+
+        // Initialize App
+        function initApp() {
+            totalCardsEl.textContent = cards.length;
+            updateCardDisplay();
+        }
+
+        // Update Card Contents & UI State
+        function updateCardDisplay() {
+            const currentCard = cards[currentIndex];
+
+            // Reset Card Flip state to front smoothly
+            if (isFlipped) {
+                flashcard.classList.remove('rotate-y-180');
+                isFlipped = false;
+                // Wait for half of transition before swapping text to prevent visual glitch
+                setTimeout(() => setCardText(currentCard), 200);
+            } else {
+                setCardText(currentCard);
+            }
+
+            // Update Progress & Counters
+            currentIndexEl.textContent = currentIndex + 1;
+            const progressPercent = ((currentIndex + 1) / cards.length) * 100;
+            progressBarEl.style.width = `${progressPercent}%`;
+        }
+
+        // Set Text Content into HTML elements
+        function setCardText(item) {
+            englishWordEl.textContent = item.en;
+            phoneticEl.textContent = item.phonetic;
+            germanWordEl.textContent = item.de;
+            typeEl.textContent = item.type;
+            
+            exEn1El.textContent = `1. ${item.ex1_en}`;
+            exDe1El.textContent = item.ex1_de;
+            exEn2El.textContent = `2. ${item.ex2_en}`;
+            exDe2El.textContent = item.ex2_de;
+        }
+
+        // Flip Card Action
+        function flipCard() {
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                flashcard.classList.add('rotate-y-180');
+            } else {
+                flashcard.classList.remove('rotate-y-180');
+            }
+        }
+
+        // Next Card Action
+        function nextCard() {
+            if (currentIndex < cards.length - 1) {
+                currentIndex++;
+            } else {
+                currentIndex = 0; // Loop back to start
+            }
+            updateCardDisplay();
+        }
+
+        // Previous Card Action
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+            } else {
+                currentIndex = cards.length - 1; // Loop back to end
+            }
+            updateCardDisplay();
+        }
+
+        // Shuffle Cards Action
+        function shuffleCards() {
+            // Fisher-Yates Shuffle Algorithm
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+            currentIndex = 0;
+            updateCardDisplay();
+        }
+
+        // Speech Synthesis for High Quality Audio Pronunciation
+        function speakCurrentWord(event) {
+            if (event) {
+                event.stopPropagation(); // Stop card flipping when clicking speaker icon
+            }
+
+            if (!('speechSynthesis' in window)) {
+                alert("Sprachausgabe wird in diesem Browser leider nicht unterstützt.");
+                return;
+            }
+
+            // Stop any active speech
+            window.speechSynthesis.cancel();
+
+            const currentCard = cards[currentIndex];
+            const utterance = new SpeechSynthesisUtterance(currentCard.en);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9; // Slightly slower for crisp clear educational pronunciation
+
+            // Select natural voice if available
+            const voices = window.speechSynthesis.getVoices();
+            const preferredVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha')));
+            if (preferredVoice) {
+                utterance.voice = preferredVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Preload voices for Speech Synthesis
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
+
+        // Keyboard Shortcuts Handler
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                flipCard();
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                nextCard();
+            } else if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                prevCard();
+            }
+        });
+
+        // Initialize on load
+        window.onload = initApp;
+    </script>
+</body>
+</html>
